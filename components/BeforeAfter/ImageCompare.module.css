@@ -1,0 +1,105 @@
+.compare {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  aspect-ratio: 16/10;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-strong);
+  cursor: ew-resize;
+  user-select: none;
+}
+
+.imageAfter,
+.imageBefore {
+  position: absolute;
+  inset: 0;
+}
+
+.imageBefore {
+  z-index: 2;
+}
+
+.img {
+  object-fit: cover;
+}
+
+.labelBefore,
+.labelAfter {
+  position: absolute;
+  top: 20px;
+  padding: 8px 16px;
+  font-family: var(--font-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
+  z-index: 3;
+}
+
+.labelBefore {
+  left: 20px;
+  background: rgba(15, 45, 74, 0.85);
+  color: var(--white-pure);
+}
+
+.labelAfter {
+  right: 20px;
+  background: linear-gradient(135deg, var(--blue-mid), var(--gold));
+  color: var(--white-pure);
+}
+
+.slider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  transform: translateX(-50%);
+  z-index: 4;
+  cursor: ew-resize;
+}
+
+.sliderLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+  background: var(--white-pure);
+}
+
+.sliderHandle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white-pure);
+  border: 2px solid var(--blue);
+  border-radius: 50%;
+  color: var(--blue-mid);
+  box-shadow: var(--shadow-medium);
+}
+
+.compareLabel {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 24px;
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--white-pure);
+  background: rgba(15, 45, 74, 0.75);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius-full);
+  z-index: 5;
+}
