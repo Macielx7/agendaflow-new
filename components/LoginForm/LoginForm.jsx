@@ -2,16 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { LogIn, Loader2, Eye, EyeOff } from 'lucide-react';
-import { login } from '@/services/authService';
-import styles from '@/styles/admin.module.css';
+import { api } from '@/services/api';
+import s from '@/styles/saas.module.css';
 
 export default function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -20,8 +20,8 @@ export default function LoginForm() {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
-      router.push('/admin');
+      await api.login(email, password);
+      router.push('/dashboard');
       router.refresh();
     } catch (err) {
       setError(err.message);
@@ -31,81 +31,31 @@ export default function LoginForm() {
   };
 
   return (
-    <motion.form
-      onSubmit={handleSubmit}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-    >
+    <form onSubmit={handleSubmit}>
       {error && (
-        <div style={{
-          padding: '12px 16px',
-          background: '#fee2e2',
-          color: '#b91c1c',
-          borderRadius: 12,
-          marginBottom: 20,
-          fontSize: '0.9rem',
-        }}>
+        <div style={{ padding: 12, background: 'rgba(239,68,68,0.15)', color: '#f87171', borderRadius: 12, marginBottom: 20, fontSize: '0.875rem' }}>
           {error}
         </div>
       )}
-
-      <div className={styles.formGroup}>
-        <label className={styles.formLabel}>E-mail</label>
-        <input
-          type="email"
-          className={styles.formInput}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="admin@clinica.com.br"
-          required
-          autoComplete="email"
-        />
+      <div className={s.formGroup}>
+        <label className={s.label}>E-mail</label>
+        <input type="email" className={s.input} value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
       </div>
-
-      <div className={styles.formGroup}>
-        <label className={styles.formLabel}>Senha</label>
+      <div className={s.formGroup}>
+        <label className={s.label}>Senha</label>
         <div style={{ position: 'relative' }}>
-          <input
-            type={showPassword ? 'text' : 'password'}
-            className={styles.formInput}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-            autoComplete="current-password"
-            style={{ paddingRight: 48 }}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            style={{
-              position: 'absolute',
-              right: 14,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'var(--gray-400)',
-            }}
-            aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-          >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          <input type={show ? 'text' : 'password'} className={s.input} value={password} onChange={(e) => setPassword(e.target.value)} required style={{ paddingRight: 44 }} />
+          <button type="button" onClick={() => setShow(!show)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
+            {show ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
       </div>
-
-      <button type="submit" className={styles.submitBtn} disabled={loading}>
-        {loading ? (
-          <>
-            <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
-            Entrando...
-          </>
-        ) : (
-          <>
-            <LogIn size={20} />
-            Acessar Painel
-          </>
-        )}
+      <button type="submit" className={s.btnPrimary} style={{ width: '100%', marginTop: 8 }} disabled={loading}>
+        {loading ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <><LogIn size={18} /> Entrar</>}
       </button>
-    </motion.form>
+      <p style={{ textAlign: 'center', marginTop: 20, fontSize: '0.85rem' }}>
+        <Link href="/recuperar-senha" style={{ color: 'var(--accent-hover)' }}>Esqueceu a senha?</Link>
+      </p>
+    </form>
   );
 }

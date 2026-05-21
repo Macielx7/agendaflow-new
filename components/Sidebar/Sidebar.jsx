@@ -1,66 +1,55 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
-  LayoutDashboard,
-  Calendar,
-  User,
-  Settings,
-  LogOut,
+  LayoutDashboard, Calendar, ClipboardList, Users, Briefcase,
+  Clock, Settings, LogOut, User,
 } from 'lucide-react';
-import { logout } from '@/services/authService';
-import { useRouter } from 'next/navigation';
-import styles from '@/styles/admin.module.css';
+import { APP_NAME, NAV_ITEMS } from '@/utils/constants';
+import { api } from '@/services/api';
+import s from '@/styles/saas.module.css';
 
-const NAV_ITEMS = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/agendamentos', label: 'Agendamentos', icon: Calendar },
-  { href: '/admin/perfil', label: 'Perfil', icon: User },
-  { href: '/admin/configuracoes', label: 'Configurações', icon: Settings },
-];
+const ICONS = {
+  layout: LayoutDashboard, calendar: Calendar, clipboard: ClipboardList,
+  users: Users, briefcase: Briefcase, clock: Clock, settings: Settings,
+};
 
 export default function Sidebar({ open, onClose }) {
   const pathname = usePathname();
   const router = useRouter();
 
   const handleLogout = async () => {
-    await logout();
-    router.push('/admin/login');
+    await api.logout();
+    router.push('/login');
     router.refresh();
   };
 
   return (
-    <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : styles.sidebarHidden}`}>
-      <div className={styles.sidebarBrand}>
-        <h1>Dr. João Marcos</h1>
-        <span>Painel Administrativo</span>
+    <aside className={`${s.sidebar} ${open ? s.sidebarOpen : ''}`}>
+      <div className={s.sidebarBrand}>
+        <h1>{APP_NAME}</h1>
+        <span>Gestão Interna</span>
       </div>
-
-      <nav className={styles.sidebarNav}>
+      <nav className={s.sidebarNav}>
         {NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          const active =
-            item.href === '/admin'
-              ? pathname === '/admin'
-              : pathname.startsWith(item.href);
+          const Icon = ICONS[item.icon];
+          const active = pathname === item.href || pathname.startsWith(item.href + '/');
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`${styles.navItem} ${active ? styles.active : ''}`}
-              onClick={onClose}
-            >
-              <Icon size={20} />
+            <Link key={item.href} href={item.href} className={`${s.navItem} ${active ? s.active : ''}`} onClick={onClose}>
+              <Icon size={18} />
               {item.label}
             </Link>
           );
         })}
+        <Link href="/perfil" className={`${s.navItem} ${pathname === '/perfil' ? s.active : ''}`} onClick={onClose}>
+          <User size={18} />
+          Perfil
+        </Link>
       </nav>
-
-      <div className={styles.sidebarFooter}>
-        <button type="button" className={styles.logoutBtn} onClick={handleLogout}>
-          <LogOut size={20} />
+      <div className={s.sidebarFooter}>
+        <button type="button" className={s.logoutBtn} onClick={handleLogout}>
+          <LogOut size={18} />
           Sair
         </button>
       </div>

@@ -3,6 +3,15 @@ import { jwtVerify } from 'jose';
 
 const COOKIE_NAME = 'auth_token';
 
+const PUBLIC_PATHS = [
+  '/login',
+  '/recuperar-senha',
+  '/redefinir-senha',
+  '/api/auth/login',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+];
+
 function getSecret() {
   const secret = process.env.JWT_SECRET;
   if (!secret || secret.length < 32) {
@@ -20,36 +29,50 @@ async function verifyAuth(token) {
   }
 }
 
+function isPublic(pathname) {
+  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
+}
+
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith('/admin')) {
-    const isLoginPage = pathname === '/admin/login';
-    const token = request.cookies.get(COOKIE_NAME)?.value;
-    const session = token ? await verifyAuth(token) : null;
-
-    if (!session && !isLoginPage) {
-      const loginUrl = new URL('/admin/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    if (session && isLoginPage) {
-      return NextResponse.redirect(new URL('/admin', request.url));
-    }
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon') ||
+    pathname.endsWith('.svg') ||
+    pathname.endsWith('.ico')
+  ) {
+    return NextResponse.next();
   }
 
-  if (pathname.startsWith('/api/admin')) {
-    const token = request.cookies.get(COOKIE_NAME)?.value;
-    const session = token ? await verifyAuth(token) : null;
-    if (!session) {
+  const token = request.cookies.get(COOKIE_NAME)?.value;
+  const session = token ? await verifyAuth(token) : null;
+
+  if (pathname === '/') {
+    return NextResponse.redirect(
+      new URL(session ? '/dashboard' : '/login', request.url)
+    );
+  }
+
+  if (isPublic(pathname)) {
+    if (session && (pathname === '/login' || pathname === '/recuperar-senha')) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    return NextResponse.next();
+  }
+
+  if (!session) {
+    if (pathname.startsWith('/api/')) {
       return NextResponse.json({ success: false, error: 'Não autorizado' }, { status: 401 });
     }
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  matcher: ['/((?!_next/static|_next/image).*)'],
 };

@@ -1,0 +1,33 @@
+.chart { padding: 8px 0; }
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 160px;
+  padding-top: 20px;
+}
+
+.barGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.bar {
+  width: 100%;
+  max-width: 40px;
+  min-height: 4px;
+  background: linear-gradient(180deg, var(--accent-hover), var(--accent));
+  border-radius: 6px 6px 2px 2px;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}

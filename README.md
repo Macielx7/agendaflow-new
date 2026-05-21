@@ -1,105 +1,59 @@
-# Dr. João Marcos — Landing Page + Sistema de Agendamento
+# AgendaPro — SaaS de Gestão de Agendamentos
 
-Plataforma premium para clínica odontológica com landing page de alto padrão e sistema completo de agendamento online integrado.
+Sistema administrativo interno para gestão de agendamentos, clientes, serviços e horários.
 
 ## Stack
 
-- **Frontend:** Next.js 14 (App Router), React, Framer Motion, CSS Modules
-- **Backend:** Next.js API Routes
-- **Banco:** PostgreSQL + Prisma ORM
-- **Auth:** JWT (httpOnly cookies)
-
-## Estrutura
-
-```
-app/
-  agendar/          → Fluxo de agendamento público
-  admin/            → Painel administrativo
-  api/              → APIs REST
-components/         → Componentes reutilizáveis
-context/            → Toast, providers
-lib/                → Prisma, auth, validações, slots
-prisma/             → Schema, migrations, seed
-services/           → Clientes API
-styles/             → Estilos compartilhados (booking, admin)
-middleware.js       → Proteção de rotas admin
-```
+- Next.js 14 (App Router) · React · JavaScript
+- PostgreSQL · Prisma ORM
+- JWT (cookies httpOnly) · Framer Motion
 
 ## Instalação
 
-### 1. Dependências
-
 ```bash
 npm install
-```
-
-### 2. Variáveis de ambiente
-
-```bash
 cp .env.example .env
-```
+# Configure DATABASE_URL e JWT_SECRET
 
-Edite `.env` com sua conexão PostgreSQL e JWT_SECRET (mín. 32 caracteres).
-
-### 3. Banco de dados
-
-```bash
 npx prisma migrate dev
 npm run db:seed
-```
-
-### 4. Desenvolvimento
-
-```bash
 npm run dev
 ```
 
-Acesse:
-- Landing: http://localhost:3000
-- Agendamento: http://localhost:3000/agendar
-- Admin: http://localhost:3000/admin/login
+## Acesso
 
-## Credenciais padrão (seed)
+- URL: http://localhost:3000
+- Login: `admin@clinica.com.br` / `Admin@2024!`
 
-| Campo | Valor |
-|-------|-------|
-| E-mail | admin@drjoaomarcos.com.br |
-| Senha | Admin@2024! |
+## Módulos
 
-Altere via variáveis `ADMIN_EMAIL` e `ADMIN_PASSWORD` no `.env`.
-
-## Funcionalidades
-
-### Agendamento (público)
-- Escolha de procedimento, data e horário
-- Validação de horários duplicados e datas passadas
-- Formulário com nome, WhatsApp, e-mail e observações
-- Confirmação visual premium
-
-### Painel Admin
-- Login/logout com JWT
-- Dashboard com estatísticas
-- Lista, filtros e detalhes de agendamentos
-- Confirmar, cancelar e finalizar consultas
-- Perfil e configurações da clínica
+| Rota | Função |
+|------|--------|
+| `/dashboard` | Estatísticas, gráficos, consultas do dia |
+| `/agenda` | Visualização dia/semana/mês |
+| `/agendamentos` | CRUD completo |
+| `/clientes` | CRUD clientes |
+| `/servicos` | CRUD serviços |
+| `/horarios` | Dias, intervalos, feriados, limite diário |
+| `/configuracoes` | Dados da empresa |
+| `/perfil` | Perfil e senha |
+| `/recuperar-senha` | Reset de senha |
 
 ## Scripts
 
-| Comando | Descrição |
-|---------|-----------|
-| `npm run dev` | Servidor de desenvolvimento |
-| `npm run build` | Build de produção |
-| `npm run db:migrate` | Executar migrations |
-| `npm run db:seed` | Popular banco inicial |
-| `npm run db:studio` | Prisma Studio |
+```bash
+npm run dev          # Desenvolvimento
+npm run build        # Build produção
+npm run db:migrate   # Migrations
+npm run db:seed      # Dados iniciais
+npm run db:studio    # Prisma Studio
+```
 
-## Produção
+## Migração do projeto anterior
 
-1. Configure `DATABASE_URL` e `JWT_SECRET` no ambiente
-2. `npx prisma migrate deploy`
-3. `npm run db:seed` (primeira vez)
-4. `npm run build && npm start`
+A migration `saas_restructure` recria o schema. Em banco existente:
 
-## Licença
-
-Projeto privado — Dr. João Marcos.
+```bash
+npx prisma migrate reset
+npm run db:seed
+```
