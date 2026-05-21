@@ -1,0 +1,55 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--gray-50);
+  transition: background 0.2s;
+}
+
+.card:hover {
+  background: rgba(74, 159, 212, 0.04);
+}
+
+.time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--blue-dark);
+  min-width: 70px;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--gray-900);
+}
+
+.procedure {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+
+.status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.PENDING { background: #fef3c7; color: #b45309; }
+.CONFIRMED { background: #d1fae5; color: #047857; }
+.CANCELLED { background: #fee2e2; color: #b91c1c; }
+.COMPLETED { background: #e0e7ff; color: #4338ca; }

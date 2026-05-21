@@ -1,0 +1,61 @@
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  min-width: 280px;
+  max-width: 420px;
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 12px 40px rgba(15, 45, 74, 0.15);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.success {
+  background: rgba(16, 185, 129, 0.95);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.error {
+  background: rgba(239, 68, 68, 0.95);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.warning {
+  background: rgba(245, 158, 11, 0.95);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.info {
+  background: rgba(26, 77, 122, 0.95);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.icon {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.message {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.close {
+  flex-shrink: 0;
+  opacity: 0.7;
+  padding: 4px;
+  border-radius: 8px;
+  transition: opacity 0.2s;
+  color: inherit;
+}
+
+.close:hover {
+  opacity: 1;
+}

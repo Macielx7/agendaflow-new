@@ -18,6 +18,11 @@ export const CONTACT = {
   hours: 'Segunda a Sexta: 9h às 19h | Sábado: 9h às 14h',
 };
 
+export const BOOKING = {
+  url: '/agendar',
+  label: 'Agendar Consulta',
+};
+
 export const NAV_LINKS = [
   { label: 'Início', href: '#inicio' },
   { label: 'Especialidades', href: '#especialidades' },

@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(ADMIN)
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Procedure {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  description String?
+  duration    Int           @default(60)
+  icon        String?
+  color       String?
+  active      Boolean       @default(true)
+  sortOrder   Int           @default(0)
+  appointments Appointment[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("procedures")
+}
+
+model Schedule {
+  id           String   @id @default(cuid())
+  dayOfWeek    Int
+  startTime    String
+  endTime      String
+  slotDuration Int      @default(60)
+  breakStart   String?
+  breakEnd     String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([dayOfWeek])
+  @@map("schedules")
+}
+
+model Appointment {
+  id           String            @id @default(cuid())
+  procedureId  String
+  procedure    Procedure         @relation(fields: [procedureId], references: [id])
+  date         DateTime          @db.Date
+  time         String
+  patientName  String
+  patientPhone String
+  patientEmail String?
+  notes        String?
+  status       AppointmentStatus @default(PENDING)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@unique([date, time])
+  @@index([status])
+  @@index([date])
+  @@map("appointments")
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  label     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}

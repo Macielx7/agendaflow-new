@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-import { NAV_LINKS } from '@/utils/constants';
+import Link from 'next/link';
+import { NAV_LINKS, BOOKING } from '@/utils/constants';
 import { getWhatsAppLink, scrollToSection } from '@/utils/helpers';
 import styles from './Navbar.module.css';
 
@@ -73,14 +74,9 @@ export default function Navbar() {
           </nav>
 
           <div className={styles.actions}>
-            <a
-              href={getWhatsAppLink()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.ctaBtn}
-            >
-              Agendar Avaliação
-            </a>
+            <Link href={BOOKING.url} className={styles.ctaBtn}>
+              {BOOKING.label}
+            </Link>
 
             <button
               className={styles.menuBtn}
@@ -128,15 +124,14 @@ export default function Navbar() {
                 ))}
               </nav>
 
-              <a
-                href={getWhatsAppLink()}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href={BOOKING.url}
                 className="btn-primary"
                 style={{ width: '100%', marginTop: 'auto' }}
+                onClick={() => setMenuOpen(false)}
               >
-                Agendar pelo WhatsApp
-              </a>
+                {BOOKING.label}
+              </Link>
             </motion.div>
             <div
               className={styles.overlay}

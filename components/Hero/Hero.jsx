@@ -6,7 +6,8 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { FaWhatsapp, FaInstagram, FaPlay } from 'react-icons/fa';
 import { ChevronDown, Sparkles } from 'lucide-react';
 import AnimatedBackground from '@/components/AnimatedBackground/AnimatedBackground';
-import { CONTACT } from '@/utils/constants';
+import Link from 'next/link';
+import { CONTACT, BOOKING } from '@/utils/constants';
 import { getWhatsAppLink, scrollToSection } from '@/utils/helpers';
 import { heroText, floatAnimation } from '@/animations/variants';
 import styles from './Hero.module.css';
@@ -69,14 +70,17 @@ export default function Hero() {
             initial="hidden"
             animate="visible"
           >
+            <Link href={BOOKING.url} className="btn-primary">
+              Agendar Consulta
+            </Link>
             <a
               href={getWhatsAppLink()}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary"
+              className="btn-secondary"
             >
               <FaWhatsapp size={20} />
-              Agendar Avaliação Gratuita
+              WhatsApp
             </a>
             <a
               href={CONTACT.instagram}

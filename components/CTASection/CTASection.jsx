@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 import { FaWhatsapp, FaInstagram } from 'react-icons/fa';
 import { Clock, Users } from 'lucide-react';
-import { CONTACT } from '@/utils/constants';
+import Link from 'next/link';
+import { CONTACT, BOOKING } from '@/utils/constants';
 import { getWhatsAppLink } from '@/utils/helpers';
 import { useInView } from '@/hooks/useInView';
 import styles from './CTASection.module.css';
@@ -72,6 +73,11 @@ export default function CTASection() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.4 }}
         >
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+            <Link href={BOOKING.url} className={styles.bookingBtn}>
+              Agendar Consulta Online
+            </Link>
+          </motion.div>
           <motion.a
             href={getWhatsAppLink()}
             target="_blank"
@@ -81,7 +87,7 @@ export default function CTASection() {
             whileTap={{ scale: 0.98 }}
           >
             <FaWhatsapp size={28} />
-            Quero Minha Avaliação Gratuita
+            Falar no WhatsApp
           </motion.a>
           <motion.a
             href={CONTACT.instagram}
