@@ -1,28 +1,30 @@
 export const dynamic = 'force-dynamic';
 
 import prisma from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
+import { requireTenantId, withTenantData } from '@/lib/tenant';
 import { validateServiceBody } from '@/lib/validations';
-import { jsonResponse, errorResponse, unauthorizedResponse, parseBody } from '@/lib/api';
+import { jsonResponse, errorResponse, parseBody } from '@/lib/api';
 
 export async function GET() {
-  const session = await getSession();
-  if (!session) return unauthorizedResponse();
-  const services = await prisma.service.findMany({ orderBy: { sortOrder: 'asc' } });
+  const { tenantId, error } = await requireTenantId();
+  if (error) return error;
+  const services = await prisma.service.findMany({ where: { tenantId }, orderBy: { sortOrder: 'asc' } });
   return jsonResponse({ success: true, services });
 }
 
 export async function POST(request) {
-  const session = await getSession();
-  if (!session) return unauthorizedResponse();
+  const { tenantId, error } = await requireTenantId();
+  if (error) return error;
   const body = await parseBody(request);
   const validation = validateServiceBody(body);
   if (!validation.valid) return errorResponse(validation.error);
   const { slug, ...rest } = validation.data;
-  const existing = await prisma.service.findUnique({ where: { slug } });
+  const existing = await prisma.service.findUnique({
+    where: { tenantId_slug: { tenantId, slug } },
+  });
   const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
   const service = await prisma.service.create({
-    data: { ...rest, slug: finalSlug },
+    data: withTenantData(tenantId, { ...rest, slug: finalSlug }),
   });
   return jsonResponse({ success: true, service }, 201);
 }

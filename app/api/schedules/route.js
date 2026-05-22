@@ -1,19 +1,22 @@
 export const dynamic = 'force-dynamic';
 
 import prisma from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
-import { jsonResponse, unauthorizedResponse, errorResponse, parseBody } from '@/lib/api';
+import { requireTenantId } from '@/lib/tenant';
+import { jsonResponse, errorResponse, parseBody } from '@/lib/api';
 
 export async function GET() {
-  const session = await getSession();
-  if (!session) return unauthorizedResponse();
-  const schedules = await prisma.schedule.findMany({ orderBy: { dayOfWeek: 'asc' } });
+  const { tenantId, error } = await requireTenantId();
+  if (error) return error;
+  const schedules = await prisma.schedule.findMany({
+    where: { tenantId },
+    orderBy: { dayOfWeek: 'asc' },
+  });
   return jsonResponse({ success: true, schedules });
 }
 
 export async function PUT(request) {
-  const session = await getSession();
-  if (!session) return unauthorizedResponse();
+  const { tenantId, error } = await requireTenantId();
+  if (error) return error;
   const body = await parseBody(request);
   if (!body?.schedules || !Array.isArray(body.schedules)) {
     return errorResponse('Dados inválidos');
@@ -22,7 +25,7 @@ export async function PUT(request) {
   const results = await Promise.all(
     body.schedules.map((s) =>
       prisma.schedule.upsert({
-        where: { dayOfWeek: s.dayOfWeek },
+        where: { tenantId_dayOfWeek: { tenantId, dayOfWeek: s.dayOfWeek } },
         update: {
           startTime: s.startTime,
           endTime: s.endTime,
@@ -32,6 +35,7 @@ export async function PUT(request) {
           active: s.active !== false,
         },
         create: {
+          tenantId,
           dayOfWeek: s.dayOfWeek,
           startTime: s.startTime,
           endTime: s.endTime,

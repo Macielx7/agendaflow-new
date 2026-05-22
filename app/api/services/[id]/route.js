@@ -1,29 +1,28 @@
 export const dynamic = 'force-dynamic';
 
 import prisma from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
+import { requireTenantId } from '@/lib/tenant';
 import { validateServiceBody } from '@/lib/validations';
-import { jsonResponse, errorResponse, unauthorizedResponse, parseBody } from '@/lib/api';
+import { jsonResponse, errorResponse, parseBody } from '@/lib/api';
 
 export async function PATCH(request, { params }) {
-  const session = await getSession();
-  if (!session) return unauthorizedResponse();
+  const { tenantId, error } = await requireTenantId();
+  if (error) return error;
   const body = await parseBody(request);
   const validation = validateServiceBody(body);
   if (!validation.valid) return errorResponse(validation.error);
+  const existing = await prisma.service.findFirst({ where: { id: params.id, tenantId } });
+  if (!existing) return errorResponse('Não encontrado', 404);
   const { slug, ...rest } = validation.data;
-  const service = await prisma.service.update({
-    where: { id: params.id },
-    data: rest,
-  });
+  const service = await prisma.service.update({ where: { id: params.id }, data: rest });
   return jsonResponse({ success: true, service });
 }
 
 export async function DELETE(request, { params }) {
-  const session = await getSession();
-  if (!session) return unauthorizedResponse();
+  const { tenantId, error } = await requireTenantId();
+  if (error) return error;
   const count = await prisma.appointment.count({
-    where: { serviceId: params.id, status: { not: 'CANCELLED' } },
+    where: { serviceId: params.id, tenantId, status: { not: 'CANCELLED' } },
   });
   if (count > 0) {
     const service = await prisma.service.update({

@@ -22,8 +22,13 @@ npm run dev
 
 ## Acesso
 
+**Painel da clínica (tenant)**
 - URL: http://localhost:3000
 - Login: `admin@clinica.com.br` / `Admin@2024!`
+
+**Super Admin (dono do SaaS)**
+- URL: http://localhost:3000/superadmin/login
+- Login: `super@agendapro.com` / `Super@2024!`
 
 ## Módulos
 
@@ -49,11 +54,13 @@ npm run db:seed      # Dados iniciais
 npm run db:studio    # Prisma Studio
 ```
 
-## Migração do projeto anterior
+## Multi-tenant + Super Admin
 
-A migration `saas_restructure` recria o schema. Em banco existente:
+- Cada clínica é um **tenant** com dados isolados
+- Planos: Básico, Profissional, Premium
+- Super Admin: `/superadmin` — gestão global, assinaturas, impersonate
 
 ```bash
-npx prisma migrate reset
+npx prisma migrate dev
 npm run db:seed
 ```

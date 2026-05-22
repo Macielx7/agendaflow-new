@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { startOfDay, isBefore } from 'date-fns';
 import prisma from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
+import { requireTenantId, withTenant, withTenantData } from '@/lib/tenant';
 import { getAvailableSlots } from '@/lib/slots';
 import { validateAppointmentBody } from '@/lib/validations';
 import { jsonResponse, errorResponse, unauthorizedResponse, parseBody } from '@/lib/api';
@@ -10,8 +10,8 @@ import { jsonResponse, errorResponse, unauthorizedResponse, parseBody } from '@/
 const include = { client: true, service: true };
 
 export async function GET(request) {
-  const session = await getSession();
-  if (!session) return unauthorizedResponse();
+  const { tenantId, error } = await requireTenantId();
+  if (error) return error;
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
@@ -21,7 +21,7 @@ export async function GET(request) {
   const clientId = searchParams.get('clientId');
   const search = searchParams.get('search');
 
-  const where = {};
+  const where = { tenantId };
   if (status && status !== 'all') where.status = status;
   if (date) where.date = new Date(date + 'T12:00:00');
   if (from && to) {
@@ -45,8 +45,8 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const session = await getSession();
-  if (!session) return unauthorizedResponse();
+  const { tenantId, error } = await requireTenantId();
+  if (error) return error;
 
   const body = await parseBody(request);
   const validation = validateAppointmentBody(body);
@@ -54,7 +54,7 @@ export async function POST(request) {
 
   const { clientId, serviceId, date, time, notes, status, price } = validation.data;
 
-  const service = await prisma.service.findUnique({ where: { id: serviceId } });
+  const service = await prisma.service.findFirst({ where: { id: serviceId, tenantId } });
   if (!service) return errorResponse('Serviço não encontrado');
 
   const appointmentDate = startOfDay(new Date(date + 'T12:00:00'));
@@ -62,18 +62,18 @@ export async function POST(request) {
     return errorResponse('Data passada não permitida');
   }
 
-  const { slots } = await getAvailableSlots(date, service.duration);
+  const { slots } = await getAvailableSlots(date, tenantId, service.duration);
   if (!slots.includes(time)) return errorResponse('Horário indisponível');
 
   const existing = await prisma.appointment.findFirst({
-    where: { date: appointmentDate, time, status: { not: 'CANCELLED' } },
+    where: { tenantId, date: appointmentDate, time, status: { not: 'CANCELLED' } },
   });
   if (existing) return errorResponse('Horário já reservado');
 
   const finalPrice = price ?? parseFloat(service.price);
 
   const appointment = await prisma.appointment.create({
-    data: {
+    data: withTenantData(tenantId, {
       clientId,
       serviceId,
       date: appointmentDate,
@@ -81,7 +81,7 @@ export async function POST(request) {
       notes,
       status,
       price: finalPrice,
-    },
+    }),
     include,
   });
 

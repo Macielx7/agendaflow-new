@@ -20,9 +20,169 @@ enum UserRole {
   STAFF
 }
 
+enum SuperAdminRole {
+  SUPER_ADMIN
+  DEVELOPER
+  SUPPORT
+}
+
+enum TenantStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+  CANCELLED
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PENDING
+  SUSPENDED
+  CANCELLED
+  EXPIRED
+}
+
+enum BillingStatus {
+  PAID
+  PENDING
+  FAILED
+  REFUNDED
+}
+
+model SuperAdmin {
+  id        String         @id @default(cuid())
+  email     String         @unique
+  password  String
+  name      String
+  role      SuperAdminRole @default(SUPER_ADMIN)
+  active    Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  logs      SystemLog[]
+
+  @@map("super_admins")
+}
+
+model Plan {
+  id                String         @id @default(cuid())
+  slug              String         @unique
+  name              String
+  description       String?
+  priceMonthly      Decimal        @default(0) @db.Decimal(10, 2)
+  priceYearly       Decimal        @default(0) @db.Decimal(10, 2)
+  maxUsers          Int            @default(1)
+  maxAppointments   Int            @default(100)
+  features          String         @default("[]")
+  active            Boolean        @default(true)
+  sortOrder         Int            @default(0)
+  subscriptions     Subscription[]
+  tenants           Tenant[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@map("plans")
+}
+
+model Tenant {
+  id              String              @id @default(cuid())
+  slug            String              @unique
+  companyName     String
+  ownerName       String
+  email           String
+  phone           String?
+  status          TenantStatus        @default(PENDING)
+  planId          String?
+  plan            Plan?               @relation(fields: [planId], references: [id])
+  subscription    Subscription?
+  lastAccessAt    DateTime?
+  users           User[]
+  clients         Client[]
+  services        Service[]
+  schedules       Schedule[]
+  holidays        Holiday[]
+  appointments    Appointment[]
+  settings        Setting[]
+  billingHistory  BillingHistory[]
+  featurePermissions FeaturePermission[]
+  logs            SystemLog[]
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([status])
+  @@index([email])
+  @@map("tenants")
+}
+
+model Subscription {
+  id           String             @id @default(cuid())
+  tenantId     String             @unique
+  tenant       Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  planId       String
+  plan         Plan               @relation(fields: [planId], references: [id])
+  status       SubscriptionStatus @default(TRIAL)
+  trialEndsAt  DateTime?
+  startsAt     DateTime           @default(now())
+  endsAt       DateTime?
+  renewedAt    DateTime?
+  cancelledAt  DateTime?
+  billingCycle String             @default("monthly")
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model BillingHistory {
+  id          String        @id @default(cuid())
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  amount      Decimal       @db.Decimal(10, 2)
+  description String?
+  status      BillingStatus @default(PENDING)
+  paidAt      DateTime?
+  dueAt       DateTime?
+  createdAt   DateTime      @default(now())
+
+  @@index([tenantId])
+  @@map("billing_history")
+}
+
+model FeaturePermission {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  module    String
+  enabled   Boolean  @default(true)
+  limit     Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, module])
+  @@map("feature_permissions")
+}
+
+model SystemLog {
+  id           String      @id @default(cuid())
+  tenantId     String?
+  tenant       Tenant?     @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  superAdminId String?
+  superAdmin   SuperAdmin? @relation(fields: [superAdminId], references: [id], onDelete: SetNull)
+  action       String
+  details      String?
+  ip           String?
+  createdAt    DateTime    @default(now())
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("system_logs")
+}
+
 model User {
   id               String    @id @default(cuid())
-  email            String    @unique
+  tenantId         String
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  email            String
   password         String
   name             String
   role             UserRole  @default(ADMIN)
@@ -32,11 +192,15 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
+  @@unique([tenantId, email])
+  @@index([tenantId])
   @@map("users")
 }
 
 model Client {
   id           String        @id @default(cuid())
+  tenantId     String
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name         String
   phone        String
   email        String?
@@ -45,6 +209,7 @@ model Client {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
+  @@index([tenantId])
   @@index([phone])
   @@index([name])
   @@map("clients")
@@ -52,7 +217,9 @@ model Client {
 
 model Service {
   id           String        @id @default(cuid())
-  slug         String        @unique
+  tenantId     String
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  slug         String
   name         String
   description  String?
   duration     Int           @default(60)
@@ -63,11 +230,15 @@ model Service {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
+  @@unique([tenantId, slug])
+  @@index([tenantId])
   @@map("services")
 }
 
 model Schedule {
   id           String   @id @default(cuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   dayOfWeek    Int
   startTime    String
   endTime      String
@@ -78,23 +249,28 @@ model Schedule {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  @@unique([dayOfWeek])
+  @@unique([tenantId, dayOfWeek])
   @@map("schedules")
 }
 
 model Holiday {
   id        String   @id @default(cuid())
-  date      DateTime @unique @db.Date
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
   name      String?
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([tenantId, date])
   @@map("holidays")
 }
 
 model Appointment {
   id        String            @id @default(cuid())
+  tenantId  String
+  tenant    Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   clientId  String
   client    Client            @relation(fields: [clientId], references: [id])
   serviceId String
@@ -107,7 +283,8 @@ model Appointment {
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 
-  @@unique([date, time])
+  @@unique([tenantId, date, time])
+  @@index([tenantId])
   @@index([status])
   @@index([date])
   @@index([clientId])
@@ -116,11 +293,14 @@ model Appointment {
 
 model Setting {
   id        String   @id @default(cuid())
-  key       String   @unique
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  key       String
   value     String
   label     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([tenantId, key])
   @@map("settings")
 }

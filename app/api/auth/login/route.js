@@ -11,12 +11,28 @@ export async function POST(request) {
   const validation = validateLoginBody(body);
   if (!validation.valid) return errorResponse(validation.error);
   const { email, password } = validation.data;
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findFirst({ where: { email } });
   if (!user) return errorResponse('Credenciais inválidas', 401);
   if (!(await verifyPassword(password, user.password))) {
     return errorResponse('Credenciais inválidas', 401);
   }
-  const token = await createToken({ userId: user.id, email: user.email, name: user.name, role: user.role });
+  const { assertTenantAccess } = await import('@/lib/tenantAccess');
+  const access = await assertTenantAccess(user.tenantId);
+  if (!access.ok) return errorResponse(access.error, 403);
+  await prisma.tenant.update({
+    where: { id: user.tenantId },
+    data: { lastAccessAt: new Date() },
+  });
+  const token = await createToken({
+    userId: user.id,
+    tenantId: user.tenantId,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+  });
   await setAuthCookie(token);
-  return jsonResponse({ success: true, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+  return jsonResponse({
+    success: true,
+    user: { id: user.id, email: user.email, name: user.name, role: user.role, tenantId: user.tenantId },
+  });
 }

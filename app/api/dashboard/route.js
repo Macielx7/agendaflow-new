@@ -2,14 +2,15 @@ export const dynamic = 'force-dynamic';
 
 import { startOfDay, endOfDay, addDays, subDays, format } from 'date-fns';
 import prisma from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
-import { jsonResponse, unauthorizedResponse } from '@/lib/api';
+import { requireTenantId } from '@/lib/tenant';
+import { jsonResponse } from '@/lib/api';
 
 export async function GET() {
-  const session = await getSession();
-  if (!session) return unauthorizedResponse();
+  const { tenantId, error } = await requireTenantId();
+  if (error) return error;
 
   const today = startOfDay(new Date());
+  const tf = { tenantId };
   const weekStart = subDays(today, 6);
   const monthStart = subDays(today, 29);
 
@@ -23,25 +24,27 @@ export async function GET() {
     weekData,
     revenueAgg,
   ] = await Promise.all([
-    prisma.appointment.count({ where: { status: { not: 'CANCELLED' } } }),
+    prisma.appointment.count({ where: { ...tf, status: { not: 'CANCELLED' } } }),
     prisma.appointment.count({
-      where: { date: today, status: { not: 'CANCELLED' } },
+      where: { ...tf, date: today, status: { not: 'CANCELLED' } },
     }),
     prisma.appointment.findMany({
-      where: { date: today, status: { not: 'CANCELLED' } },
+      where: { ...tf, date: today, status: { not: 'CANCELLED' } },
       include: { client: true, service: true },
       orderBy: { time: 'asc' },
       take: 10,
     }),
-    prisma.appointment.count({ where: { status: 'PENDING' } }),
-    prisma.appointment.count({ where: { status: 'CONFIRMED' } }),
+    prisma.appointment.count({ where: { ...tf, status: 'PENDING' } }),
+    prisma.appointment.count({ where: { ...tf, status: 'CONFIRMED' } }),
     prisma.appointment.findMany({
+      where: tf,
       take: 8,
       orderBy: { createdAt: 'desc' },
       include: { client: true, service: true },
     }),
     prisma.appointment.findMany({
       where: {
+        ...tf,
         date: { gte: weekStart, lte: endOfDay(today) },
         status: { not: 'CANCELLED' },
       },
@@ -49,6 +52,7 @@ export async function GET() {
     }),
     prisma.appointment.aggregate({
       where: {
+        ...tf,
         date: { gte: monthStart },
         status: { in: ['CONFIRMED', 'COMPLETED', 'IN_PROGRESS'] },
       },
@@ -71,6 +75,7 @@ export async function GET() {
 
   const upcoming = await prisma.appointment.findMany({
     where: {
+      ...tf,
       date: { gte: today, lte: endOfDay(addDays(today, 7)) },
       status: { in: ['PENDING', 'CONFIRMED'] },
     },
@@ -81,6 +86,7 @@ export async function GET() {
 
   const byStatus = await prisma.appointment.groupBy({
     by: ['status'],
+    where: tf,
     _count: { status: true },
   });
 

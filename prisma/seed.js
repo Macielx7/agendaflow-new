@@ -4,14 +4,60 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
+  const plans = [
+    { id: 'plan_basico', slug: 'basico', name: 'Básico', description: 'Ideal para começar', priceMonthly: 97, priceYearly: 970, maxUsers: 2, maxAppointments: 100, features: '["agenda","clientes","servicos"]', sortOrder: 1 },
+    { id: 'plan_pro', slug: 'profissional', name: 'Profissional', description: 'Para clínicas em crescimento', priceMonthly: 197, priceYearly: 1970, maxUsers: 5, maxAppointments: 500, features: '["agenda","clientes","servicos","horarios","relatorios"]', sortOrder: 2 },
+    { id: 'plan_premium', slug: 'premium', name: 'Premium', description: 'Recursos completos', priceMonthly: 397, priceYearly: 3970, maxUsers: 20, maxAppointments: 9999, features: '["agenda","clientes","servicos","horarios","configuracoes","relatorios","api","suporte"]', sortOrder: 3 },
+  ];
+
+  for (const p of plans) {
+    await prisma.plan.upsert({ where: { slug: p.slug }, update: p, create: p });
+  }
+
+  const superEmail = process.env.SUPER_ADMIN_EMAIL || 'super@agendapro.com';
+  const superPass = process.env.SUPER_ADMIN_PASSWORD || 'Super@2024!';
+  await prisma.superAdmin.upsert({
+    where: { email: superEmail },
+    update: {},
+    create: {
+      email: superEmail,
+      password: await bcrypt.hash(superPass, 12),
+      name: 'Super Administrador',
+      role: 'SUPER_ADMIN',
+    },
+  });
+
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@clinica.com.br';
   const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@2024!';
   const adminName = process.env.ADMIN_NAME || 'Administrador';
 
+  let tenant = await prisma.tenant.findUnique({ where: { slug: 'clinica-default' } });
+  if (!tenant) {
+    const trialEnd = new Date();
+    trialEnd.setDate(trialEnd.getDate() + 14);
+    const subEnd = new Date();
+    subEnd.setFullYear(subEnd.getFullYear() + 1);
+    tenant = await prisma.tenant.create({
+      data: {
+        slug: 'clinica-default',
+        companyName: 'Clínica Premium',
+        ownerName: adminName,
+        email: adminEmail,
+        phone: '(11) 99999-9999',
+        status: 'ACTIVE',
+        planId: 'plan_pro',
+        subscription: {
+          create: { planId: 'plan_pro', status: 'ACTIVE', trialEndsAt: trialEnd, endsAt: subEnd },
+        },
+      },
+    });
+  }
+
   await prisma.user.upsert({
-    where: { email: adminEmail },
+    where: { tenantId_email: { tenantId: tenant.id, email: adminEmail } },
     update: {},
     create: {
+      tenantId: tenant.id,
       email: adminEmail,
       password: await bcrypt.hash(adminPassword, 12),
       name: adminName,
@@ -21,16 +67,16 @@ async function main() {
 
   const services = [
     { slug: 'avaliacao', name: 'Avaliação', description: 'Consulta inicial', duration: 60, price: 0, sortOrder: 1 },
-    { slug: 'clareamento', name: 'Clareamento', description: 'Clareamento dental', duration: 60, price: 800, sortOrder: 2 },
-    { slug: 'lentes', name: 'Lentes de Contato', description: 'Lentes cerâmicas', duration: 90, price: 3500, sortOrder: 3 },
-    { slug: 'implante', name: 'Implante', description: 'Implante dentário', duration: 90, price: 4500, sortOrder: 4 },
+    { slug: 'clareamento', name: 'Clareamento', duration: 60, price: 800, sortOrder: 2 },
+    { slug: 'lentes', name: 'Lentes de Contato', duration: 90, price: 3500, sortOrder: 3 },
+    { slug: 'implante', name: 'Implante', duration: 90, price: 4500, sortOrder: 4 },
   ];
 
-  for (const s of services) {
+  for (const sv of services) {
     await prisma.service.upsert({
-      where: { slug: s.slug },
-      update: s,
-      create: s,
+      where: { tenantId_slug: { tenantId: tenant.id, slug: sv.slug } },
+      update: sv,
+      create: { tenantId: tenant.id, ...sv },
     });
   }
 
@@ -46,40 +92,39 @@ async function main() {
 
   for (const sched of schedules) {
     await prisma.schedule.upsert({
-      where: { dayOfWeek: sched.dayOfWeek },
+      where: { tenantId_dayOfWeek: { tenantId: tenant.id, dayOfWeek: sched.dayOfWeek } },
       update: sched,
-      create: sched,
+      create: { tenantId: tenant.id, ...sched },
     });
   }
 
   const settings = [
     { key: 'company_name', value: 'Clínica Premium', label: 'Nome da empresa' },
     { key: 'company_phone', value: '(11) 99999-9999', label: 'WhatsApp' },
-    { key: 'company_email', value: 'contato@clinica.com.br', label: 'E-mail' },
-    { key: 'company_address', value: 'São Paulo, SP', label: 'Endereço' },
-    { key: 'company_logo', value: '', label: 'Logo URL' },
+    { key: 'company_email', value: adminEmail, label: 'E-mail' },
     { key: 'max_appointments_per_day', value: '12', label: 'Máx. agendamentos/dia' },
   ];
 
   for (const setting of settings) {
     await prisma.setting.upsert({
-      where: { key: setting.key },
+      where: { tenantId_key: { tenantId: tenant.id, key: setting.key } },
       update: { value: setting.value, label: setting.label },
-      create: setting,
+      create: { tenantId: tenant.id, ...setting },
     });
   }
 
-  const clients = [
-    { name: 'Maria Silva', phone: '11999990001', email: 'maria@email.com' },
-    { name: 'João Santos', phone: '11999990002', email: 'joao@email.com' },
-  ];
-
-  for (const c of clients) {
-    const existing = await prisma.client.findFirst({ where: { phone: c.phone } });
-    if (!existing) await prisma.client.create({ data: c });
+  const modules = ['agenda', 'clientes', 'servicos', 'horarios', 'configuracoes'];
+  for (const mod of modules) {
+    await prisma.featurePermission.upsert({
+      where: { tenantId_module: { tenantId: tenant.id, module: mod } },
+      update: { enabled: true },
+      create: { tenantId: tenant.id, module: mod, enabled: true },
+    });
   }
 
-  console.log('✅ Seed concluído —', adminEmail);
+  console.log('✅ Seed OK');
+  console.log('   Tenant admin:', adminEmail, '/', adminPassword);
+  console.log('   Super admin:', superEmail, '/', superPass);
 }
 
 main()

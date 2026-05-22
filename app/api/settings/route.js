@@ -1,28 +1,28 @@
 export const dynamic = 'force-dynamic';
 
 import prisma from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
+import { requireTenantId } from '@/lib/tenant';
 import { sanitizeString } from '@/lib/validations';
-import { jsonResponse, unauthorizedResponse, errorResponse, parseBody } from '@/lib/api';
+import { jsonResponse, errorResponse, parseBody } from '@/lib/api';
 
 export async function GET() {
-  const session = await getSession();
-  if (!session) return unauthorizedResponse();
-  const settings = await prisma.setting.findMany({ orderBy: { key: 'asc' } });
+  const { tenantId, error } = await requireTenantId();
+  if (error) return error;
+  const settings = await prisma.setting.findMany({ where: { tenantId }, orderBy: { key: 'asc' } });
   return jsonResponse({ success: true, settings });
 }
 
 export async function PATCH(request) {
-  const session = await getSession();
-  if (!session) return unauthorizedResponse();
+  const { tenantId, error } = await requireTenantId();
+  if (error) return error;
   const body = await parseBody(request);
   if (!body?.settings) return errorResponse('Dados inválidos');
   const updates = await Promise.all(
     body.settings.map((s) =>
       prisma.setting.upsert({
-        where: { key: s.key },
+        where: { tenantId_key: { tenantId, key: s.key } },
         update: { value: sanitizeString(s.value, 2000) },
-        create: { key: s.key, value: sanitizeString(s.value, 2000), label: s.label || s.key },
+        create: { tenantId, key: s.key, value: sanitizeString(s.value, 2000), label: s.label || s.key },
       })
     )
   );
