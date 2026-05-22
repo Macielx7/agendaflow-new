@@ -49,6 +49,36 @@ enum BillingStatus {
   REFUNDED
 }
 
+enum WhatsappConnectionStatus {
+  DISCONNECTED
+  CONNECTING
+  CONNECTED
+  EXPIRED
+}
+
+enum WhatsappMessageType {
+  CONFIRMATION
+  REMINDER
+  CANCELLATION
+  RESCHEDULE
+  COMPLETION
+  MANUAL
+}
+
+enum WhatsappMessageStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum WhatsappTemplateType {
+  CONFIRMATION
+  REMINDER
+  CANCELLATION
+  RESCHEDULE
+  COMPLETION
+}
+
 model SuperAdmin {
   id        String         @id @default(cuid())
   email     String         @unique
@@ -105,6 +135,11 @@ model Tenant {
   billingHistory  BillingHistory[]
   featurePermissions FeaturePermission[]
   logs            SystemLog[]
+  whatsappInstance WhatsappInstance?
+  whatsappSettings WhatsappSettings?
+  whatsappTemplates WhatsappTemplate[]
+  whatsappMessages WhatsappMessage[]
+  whatsappLogs     WhatsappLog[]
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
 
@@ -303,4 +338,89 @@ model Setting {
 
   @@unique([tenantId, key])
   @@map("settings")
+}
+
+model WhatsappInstance {
+  id              String                   @id @default(cuid())
+  tenantId        String                   @unique
+  tenant          Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  instanceName    String                   @unique
+  status          WhatsappConnectionStatus @default(DISCONNECTED)
+  phoneNumber     String?
+  profileName     String?
+  qrCode          String?                  @db.Text
+  qrExpiresAt     DateTime?
+  connectedAt     DateTime?
+  disconnectedAt  DateTime?
+  lastEventAt     DateTime?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  @@index([status])
+  @@map("whatsapp_instances")
+}
+
+model WhatsappSettings {
+  id                    String   @id @default(cuid())
+  tenantId              String   @unique
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  confirmationsEnabled  Boolean  @default(true)
+  remindersEnabled      Boolean  @default(true)
+  cancellationsEnabled  Boolean  @default(true)
+  reschedulesEnabled    Boolean  @default(true)
+  completionsEnabled    Boolean  @default(true)
+  reminderHoursBefore   Int      @default(24)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("whatsapp_settings")
+}
+
+model WhatsappTemplate {
+  id        String               @id @default(cuid())
+  tenantId  String
+  tenant    Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type      WhatsappTemplateType
+  content   String               @db.Text
+  active    Boolean              @default(true)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@unique([tenantId, type])
+  @@map("whatsapp_templates")
+}
+
+model WhatsappMessage {
+  id            String                @id @default(cuid())
+  tenantId      String
+  tenant        Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  appointmentId String?
+  clientPhone   String
+  clientName    String?
+  type          WhatsappMessageType
+  content       String                @db.Text
+  status        WhatsappMessageStatus @default(PENDING)
+  errorMessage  String?
+  externalId    String?
+  sentAt        DateTime?
+  createdAt     DateTime              @default(now())
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("whatsapp_messages")
+}
+
+model WhatsappLog {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  event     String
+  payload   String?  @db.Text
+  level     String   @default("info")
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("whatsapp_logs")
 }

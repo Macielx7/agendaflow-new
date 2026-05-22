@@ -31,6 +31,9 @@ export async function PATCH(request, { params }) {
   if (!existing) return errorResponse('Não encontrado', 404);
 
   const data = {};
+  const prevStatus = existing.status;
+  const prevDate = existing.date.toISOString().slice(0, 10);
+  const prevTime = existing.time;
   if (body.status && VALID_STATUSES.includes(body.status)) data.status = body.status;
   if (body.notes !== undefined) data.notes = body.notes ? sanitizeString(body.notes, 1000) : null;
   if (body.price != null) data.price = parseFloat(body.price);
@@ -52,6 +55,21 @@ export async function PATCH(request, { params }) {
     data,
     include,
   });
+
+  const { triggerWhatsAppAsync } = await import('@/lib/whatsapp/notify');
+  if (data.status === 'CANCELLED') {
+    triggerWhatsAppAsync(tenantId, appointment.id, 'cancelled');
+  } else if (data.status === 'COMPLETED') {
+    triggerWhatsAppAsync(tenantId, appointment.id, 'completed');
+  } else if (data.date || data.time) {
+    const newDate = appointment.date.toISOString().slice(0, 10);
+    if (newDate !== prevDate || appointment.time !== prevTime) {
+      triggerWhatsAppAsync(tenantId, appointment.id, 'rescheduled');
+    }
+  } else if (data.status === 'CONFIRMED' && prevStatus !== 'CONFIRMED') {
+    triggerWhatsAppAsync(tenantId, appointment.id, 'confirmed');
+  }
+
   return jsonResponse({ success: true, appointment });
 }
 
@@ -65,5 +83,9 @@ export async function DELETE(request, { params }) {
     data: { status: 'CANCELLED' },
     include,
   });
+
+  const { triggerWhatsAppAsync } = await import('@/lib/whatsapp/notify');
+  triggerWhatsAppAsync(tenantId, appointment.id, 'cancelled');
+
   return jsonResponse({ success: true, appointment });
 }

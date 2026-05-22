@@ -17,6 +17,7 @@ const TITLES = {
   '/servicos': 'Serviços',
   '/horarios': 'Horários',
   '/configuracoes': 'Configurações',
+  '/configuracoes/whatsapp': 'WhatsApp',
   '/perfil': 'Perfil',
 };
 

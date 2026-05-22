@@ -85,5 +85,8 @@ export async function POST(request) {
     include,
   });
 
+  const { triggerWhatsAppAsync } = await import('@/lib/whatsapp/notify');
+  triggerWhatsAppAsync(tenantId, appointment.id, 'created');
+
   return jsonResponse({ success: true, appointment }, 201);
 }

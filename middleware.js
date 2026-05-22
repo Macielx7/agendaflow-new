@@ -72,6 +72,10 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
+  if (pathname.startsWith('/api/webhooks/')) {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith('/superadmin') || pathname.startsWith('/api/superadmin')) {
     const superToken = request.cookies.get(SUPER_COOKIE)?.value;
     const superSession = superToken ? await verifySuperAuth(superToken) : null;
