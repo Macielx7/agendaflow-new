@@ -18,14 +18,24 @@ export async function GET(request) {
   const date = searchParams.get('date');
   const from = searchParams.get('from');
   const to = searchParams.get('to');
+  const createdFrom = searchParams.get('createdFrom');
+  const createdTo = searchParams.get('createdTo');
   const clientId = searchParams.get('clientId');
   const search = searchParams.get('search');
 
   const where = { tenantId };
   if (status && status !== 'all') where.status = status;
   if (date) where.date = new Date(date + 'T12:00:00');
-  if (from && to) {
-    where.date = { gte: new Date(from + 'T12:00:00'), lte: new Date(to + 'T12:00:00') };
+  if (from) {
+    where.date = { ...(where.date || {}), gte: new Date(`${from}T00:00:00`) };
+  }
+  if (to) {
+    where.date = { ...(where.date || {}), lte: new Date(`${to}T23:59:59.999`) };
+  }
+  if (createdFrom || createdTo) {
+    where.createdAt = {};
+    if (createdFrom) where.createdAt.gte = new Date(`${createdFrom}T00:00:00`);
+    if (createdTo) where.createdAt.lte = new Date(`${createdTo}T23:59:59.999`);
   }
   if (clientId) where.clientId = clientId;
   if (search) {
@@ -52,7 +62,7 @@ export async function POST(request) {
   const validation = validateAppointmentBody(body);
   if (!validation.valid) return errorResponse(validation.errors.join('. '));
 
-  const { clientId, serviceId, date, time, notes, status, price } = validation.data;
+  const { clientId, serviceId, date, time, notes, status, price, duration } = validation.data;
 
   const service = await prisma.service.findFirst({ where: { id: serviceId, tenantId } });
   if (!service) return errorResponse('Serviço não encontrado');
@@ -66,7 +76,7 @@ export async function POST(request) {
   if (!slots.includes(time)) return errorResponse('Horário indisponível');
 
   const existing = await prisma.appointment.findFirst({
-    where: { tenantId, date: appointmentDate, time, status: { not: 'CANCELLED' } },
+    where: { tenantId, date: appointmentDate, time, status: { notIn: ['CANCELLED', 'NO_SHOW'] } },
   });
   if (existing) return errorResponse('Horário já reservado');
 
@@ -81,6 +91,7 @@ export async function POST(request) {
       notes,
       status,
       price: finalPrice,
+      duration: duration ?? service.duration,
     }),
     include,
   });

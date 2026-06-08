@@ -13,6 +13,7 @@ enum AppointmentStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+  NO_SHOW
 }
 
 enum UserRole {
@@ -239,6 +240,7 @@ model Client {
   name         String
   phone        String
   email        String?
+  age          Int?
   notes        String?
   appointments Appointment[]
   createdAt    DateTime      @default(now())
@@ -312,6 +314,7 @@ model Appointment {
   service   Service           @relation(fields: [serviceId], references: [id])
   date      DateTime          @db.Date
   time      String
+  duration  Int?
   notes     String?
   status    AppointmentStatus @default(PENDING)
   price     Decimal?          @db.Decimal(10, 2)

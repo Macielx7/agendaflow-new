@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 import AppointmentTable from '@/components/AppointmentTable/AppointmentTable';
 import AppointmentModal from '@/components/AppointmentModal/AppointmentModal';
@@ -18,22 +18,34 @@ export default function AgendamentosPage() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('all');
   const [search, setSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [createdFrom, setCreatedFrom] = useState('');
+  const [createdTo, setCreatedTo] = useState('');
   const [modal, setModal] = useState(false);
   const [selected, setSelected] = useState(null);
   const [confirm, setConfirm] = useState(null);
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true);
     const params = {};
     if (status !== 'all') params.status = status;
     if (search) params.search = search;
-    api.appointments(params).then((d) => setList(d.appointments)).finally(() => setLoading(false));
-  };
+    if (dateFrom) params.from = dateFrom;
+    if (dateTo) params.to = dateTo;
+    if (createdFrom) params.createdFrom = createdFrom;
+    if (createdTo) params.createdTo = createdTo;
+    api
+      .appointments(params)
+      .then((d) => setList(d.appointments))
+      .catch((err) => toast.error(err.message))
+      .finally(() => setLoading(false));
+  }, [status, search, dateFrom, dateTo, createdFrom, createdTo, toast]);
 
   useEffect(() => {
     const t = setTimeout(load, search ? 400 : 0);
     return () => clearTimeout(t);
-  }, [status, search]);
+  }, [load, search]);
 
   useEffect(() => {
     api.clients().then((d) => setClients(d.clients));
@@ -52,11 +64,28 @@ export default function AgendamentosPage() {
   };
 
   const handleCancel = async () => {
-    await api.cancelAppointment(confirm.id);
-    toast.success('Cancelado');
-    setConfirm(null);
-    load();
+    try {
+      await api.cancelAppointment(confirm.id);
+      toast.success('Agendamento excluído');
+      setConfirm(null);
+      setModal(false);
+      setSelected(null);
+      load();
+    } catch (err) {
+      toast.error(err.message);
+    }
   };
+
+  const clearFilters = () => {
+    setStatus('all');
+    setSearch('');
+    setDateFrom('');
+    setDateTo('');
+    setCreatedFrom('');
+    setCreatedTo('');
+  };
+
+  const hasFilters = status !== 'all' || search || dateFrom || dateTo || createdFrom || createdTo;
 
   return (
     <>
@@ -72,16 +101,64 @@ export default function AgendamentosPage() {
 
       <div className={s.card}>
         <div className={s.cardHeader}>
-          <div className={s.filters}>
-            <div style={{ position: 'relative' }}>
+          <div className={s.filters} style={{ flexWrap: 'wrap', width: '100%' }}>
+            <div style={{ position: 'relative', flex: '1 1 180px' }}>
               <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input className={s.filterInput} placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 36 }} />
+              <input
+                className={s.filterInput}
+                placeholder="Buscar cliente..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{ paddingLeft: 36, width: '100%' }}
+              />
             </div>
             <select className={s.select} value={status} onChange={(e) => setStatus(e.target.value)} style={{ width: 'auto' }}>
-              <option value="all">Todos</option>
-              {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              <option value="all">Todos os status</option>
+              {Object.entries(STATUS_LABELS).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
             </select>
+            <input
+              type="date"
+              className={s.filterInput}
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              title="Data do atendimento (de)"
+              style={{ width: 'auto' }}
+            />
+            <input
+              type="date"
+              className={s.filterInput}
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              title="Data do atendimento (até)"
+              style={{ width: 'auto' }}
+            />
+            <input
+              type="date"
+              className={s.filterInput}
+              value={createdFrom}
+              onChange={(e) => setCreatedFrom(e.target.value)}
+              title="Cadastrado no sistema (de)"
+              style={{ width: 'auto' }}
+            />
+            <input
+              type="date"
+              className={s.filterInput}
+              value={createdTo}
+              onChange={(e) => setCreatedTo(e.target.value)}
+              title="Cadastrado no sistema (até)"
+              style={{ width: 'auto' }}
+            />
+            {hasFilters && (
+              <button type="button" className={s.btnSecondary} onClick={clearFilters} style={{ padding: '8px 14px', fontSize: '0.85rem' }}>
+                Limpar
+              </button>
+            )}
           </div>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 12, width: '100%' }}>
+            Primeiras datas = dia do atendimento · Últimas datas = dia em que o agendamento foi criado no sistema.
+          </p>
         </div>
         <AppointmentTable
           appointments={list}
@@ -91,8 +168,24 @@ export default function AgendamentosPage() {
         />
       </div>
 
-      <AppointmentModal isOpen={modal} onClose={() => { setModal(false); setSelected(null); }} onSave={handleSave} appointment={selected} clients={clients} services={services} />
-      <ConfirmDialog isOpen={!!confirm} onClose={() => setConfirm(null)} onConfirm={handleCancel} title="Cancelar agendamento" message={`Cancelar agendamento de ${confirm?.client?.name}?`} danger />
+      <AppointmentModal
+        isOpen={modal}
+        onClose={() => { setModal(false); setSelected(null); }}
+        onSave={handleSave}
+        onDelete={(apt) => setConfirm(apt)}
+        appointment={selected}
+        clients={clients}
+        services={services}
+        onClientsChange={setClients}
+      />
+      <ConfirmDialog
+        isOpen={!!confirm}
+        onClose={() => setConfirm(null)}
+        onConfirm={handleCancel}
+        title="Excluir agendamento"
+        message={`Excluir o agendamento de ${confirm?.client?.name}?`}
+        danger
+      />
     </>
   );
 }

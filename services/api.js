@@ -3,8 +3,18 @@ async function request(url, options = {}) {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   });
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error || 'Erro na requisição');
+
+  const text = await res.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    throw new Error(res.ok ? 'Resposta inválida do servidor' : `Erro ${res.status}: ${text || 'sem resposta'}`);
+  }
+
+  if (!data?.success) {
+    throw new Error(data?.error || `Erro ${res.status}: ${text || 'Erro na requisição'}`);
+  }
   return data;
 }
 
@@ -26,8 +36,23 @@ export const api = {
   updateAppointment: (id, body) =>
     request(`/api/appointments/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   cancelAppointment: (id) => request(`/api/appointments/${id}`, { method: 'DELETE' }),
+  dayAgenda: (date, params = {}) =>
+    request(`/api/appointments/day?date=${date}&${new URLSearchParams(params)}`),
+  appointmentAction: (id, body) =>
+    request(`/api/appointments/${id}/actions`, { method: 'POST', body: JSON.stringify(body) }),
 
-  clients: (search) => request(`/api/clients?${search ? `search=${search}` : ''}`),
+  clients: (params = {}) => {
+    const q = new URLSearchParams();
+    if (typeof params === 'string') {
+      if (params) q.set('search', params);
+    } else {
+      Object.entries(params).forEach(([k, v]) => {
+        if (v != null && v !== '' && v !== 'all') q.set(k, String(v));
+      });
+    }
+    const qs = q.toString();
+    return request(`/api/clients${qs ? `?${qs}` : ''}`);
+  },
   client: (id) => request(`/api/clients/${id}`),
   createClient: (body) => request('/api/clients', { method: 'POST', body: JSON.stringify(body) }),
   updateClient: (id, body) =>

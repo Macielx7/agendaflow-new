@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
@@ -20,6 +21,7 @@ export default function Calendar({
   onSelectAppointment,
   onSelectDay,
 }) {
+  const router = useRouter();
   const aptByDate = useMemo(() => {
     const map = {};
     appointments.forEach((a) => {
@@ -29,6 +31,12 @@ export default function Calendar({
     });
     return map;
   }, [appointments]);
+
+  const openDay = (day) => {
+    const key = format(day, 'yyyy-MM-dd');
+    if (onSelectDay) onSelectDay(day);
+    else router.push(`/agenda/dia/${key}`);
+  };
 
   if (view === 'day') {
     const key = format(currentDate, 'yyyy-MM-dd');
@@ -72,7 +80,7 @@ export default function Calendar({
           const dayApts = aptByDate[key] || [];
           return (
             <div key={key} className={styles.weekCol}>
-              <button type="button" className={styles.weekHead} onClick={() => onSelectDay?.(day)}>
+              <button type="button" className={styles.weekHead} onClick={() => openDay(day)}>
                 <span>{format(day, 'EEE', { locale: ptBR })}</span>
                 <strong>{format(day, 'd')}</strong>
               </button>
@@ -116,7 +124,7 @@ export default function Calendar({
               key={key}
               type="button"
               className={`${styles.cell} ${isToday ? styles.today : ''} ${count ? styles.hasEvents : ''}`}
-              onClick={() => onSelectDay?.(day)}
+              onClick={() => openDay(day)}
             >
               <span>{format(day, 'd')}</span>
               {count > 0 && <span className={styles.dot}>{count}</span>}

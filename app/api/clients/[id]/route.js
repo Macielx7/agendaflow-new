@@ -31,10 +31,29 @@ export async function PATCH(request, { params }) {
 export async function DELETE(request, { params }) {
   const { tenantId, error } = await requireTenantId();
   if (error) return error;
-  const count = await prisma.appointment.count({
-    where: { clientId: params.id, tenantId, status: { not: 'CANCELLED' } },
+
+  const existing = await prisma.client.findFirst({ where: { id: params.id, tenantId } });
+  if (!existing) return errorResponse('Cliente não encontrado', 404);
+
+  const activeCount = await prisma.appointment.count({
+    where: {
+      clientId: params.id,
+      tenantId,
+      status: { in: ['PENDING', 'CONFIRMED', 'IN_PROGRESS'] },
+    },
   });
-  if (count > 0) return errorResponse('Cliente possui agendamentos ativos');
-  await prisma.client.delete({ where: { id: params.id } });
-  return jsonResponse({ success: true });
+  if (activeCount > 0) {
+    return errorResponse('Cliente possui agendamentos ativos. Cancele ou finalize antes de excluir.');
+  }
+
+  try {
+    await prisma.$transaction([
+      prisma.appointment.deleteMany({ where: { clientId: params.id, tenantId } }),
+      prisma.client.delete({ where: { id: params.id } }),
+    ]);
+    return jsonResponse({ success: true });
+  } catch (err) {
+    console.error('DELETE /api/clients:', err);
+    return errorResponse('Não foi possível excluir o cliente', 500);
+  }
 }

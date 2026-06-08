@@ -37,10 +37,15 @@ export async function PATCH(request, { params }) {
   if (body.status && VALID_STATUSES.includes(body.status)) data.status = body.status;
   if (body.notes !== undefined) data.notes = body.notes ? sanitizeString(body.notes, 1000) : null;
   if (body.price != null) data.price = parseFloat(body.price);
+  if (body.duration != null) {
+    const d = parseInt(body.duration, 10);
+    if (d >= 15 && d <= 480) data.duration = d;
+  }
 
   if (body.date && body.time) {
     const service = await prisma.service.findFirst({ where: { id: existing.serviceId, tenantId } });
-    const { slots } = await getAvailableSlots(body.date, tenantId, service?.duration);
+    const dur = data.duration ?? existing.duration ?? service?.duration ?? 60;
+    const { slots } = await getAvailableSlots(body.date, tenantId, dur, params.id);
     const same = existing.date.toISOString().slice(0, 10) === body.date && existing.time === body.time;
     if (!same && !slots.includes(body.time)) return errorResponse('Horário indisponível');
     data.date = startOfDay(new Date(body.date + 'T12:00:00'));

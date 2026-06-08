@@ -18,7 +18,7 @@ export default function AppointmentTable({ appointments, onEdit, onCancel, loadi
         <table className={s.table}>
           <thead>
             <tr>
-              <th>Cliente</th><th>Serviço</th><th>Data</th><th>Hora</th><th>Valor</th><th>Status</th><th></th>
+              <th>Cliente</th><th>Serviço</th><th>Data atend.</th><th>Hora</th><th>Cadastrado em</th><th>Valor</th><th>Status</th><th></th>
             </tr>
           </thead>
           <tbody>
@@ -28,13 +28,14 @@ export default function AppointmentTable({ appointments, onEdit, onCancel, loadi
                 <td>{apt.service?.name}</td>
                 <td>{formatDateShort(apt.date)}</td>
                 <td>{apt.time}</td>
+                <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{formatDateShort(apt.createdAt)}</td>
                 <td>{formatCurrency(apt.price || apt.service?.price)}</td>
                 <td><Badge status={apt.status} /></td>
                 <td>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button type="button" className={s.btnSecondary} style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => onEdit(apt)}>Editar</button>
                     {apt.status !== 'CANCELLED' && (
-                      <button type="button" className={s.btnSecondary} style={{ padding: '6px 12px', fontSize: '0.8rem', color: '#f87171' }} onClick={() => onCancel(apt)}>Cancelar</button>
+                      <button type="button" className={s.btnSecondary} style={{ padding: '6px 12px', fontSize: '0.8rem', color: '#f87171' }} onClick={() => onCancel(apt)}>Excluir</button>
                     )}
                   </div>
                 </td>
@@ -50,9 +51,24 @@ export default function AppointmentTable({ appointments, onEdit, onCancel, loadi
               <strong>{apt.client?.name}</strong>
               <Badge status={apt.status} />
             </div>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{apt.service?.name} · {formatDateShort(apt.date)} {apt.time}</p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              {apt.service?.name} · Atend.: {formatDateShort(apt.date)} {apt.time}
+            </p>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4 }}>
+              Cadastrado em: {formatDateShort(apt.createdAt)}
+            </p>
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
               <button type="button" className={s.btnSecondary} style={{ flex: 1 }} onClick={() => onEdit(apt)}>Editar</button>
+              {apt.status !== 'CANCELLED' && onCancel && (
+                <button
+                  type="button"
+                  className={s.btnSecondary}
+                  style={{ flex: 1, color: '#f87171' }}
+                  onClick={() => onCancel(apt)}
+                >
+                  Excluir
+                </button>
+              )}
             </div>
           </div>
         ))}

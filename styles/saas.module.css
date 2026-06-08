@@ -246,11 +246,12 @@
   font-size: 0.7rem; font-weight: 600;
 }
 
-.badgePENDING { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-.badgeCONFIRMED { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-.badgeIN_PROGRESS { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
-.badgeCOMPLETED { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+.badgePENDING { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+.badgeCONFIRMED { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+.badgeIN_PROGRESS { background: rgba(234, 179, 8, 0.15); color: #facc15; }
+.badgeCOMPLETED { background: rgba(156, 163, 175, 0.15); color: #9ca3af; }
 .badgeCANCELLED { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.badgeNO_SHOW { background: rgba(239, 68, 68, 0.15); color: #f87171; }
 
 .filters { display: flex; gap: 12px; flex-wrap: wrap; }
 
