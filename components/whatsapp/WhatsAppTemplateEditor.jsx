@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Save, Loader2 } from 'lucide-react';
+import { Save, Loader2, Send } from 'lucide-react';
+import WhatsAppSendTemplateModal from './WhatsAppSendTemplateModal';
 import { whatsappApi } from '@/services/whatsapp/api';
 import { useToast } from '@/context/ToastContext';
 import { TEMPLATE_VARIABLES } from '@/lib/whatsapp/defaults';
 import s from '@/styles/whatsapp.module.css';
 
 const TYPE_LABELS = {
+  BOOKING: 'Agendamento realizado',
   CONFIRMATION: 'Confirmação',
   REMINDER: 'Lembrete',
   CANCELLATION: 'Cancelamento',
@@ -20,6 +22,7 @@ export default function WhatsAppTemplateEditor() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sendTarget, setSendTarget] = useState(null);
 
   useEffect(() => {
     whatsappApi
@@ -65,7 +68,18 @@ export default function WhatsAppTemplateEditor() {
       </div>
       {templates.map((t) => (
         <div key={t.type} className={s.templateEditor}>
-          <label>{TYPE_LABELS[t.type] || t.type}</label>
+          <div className={s.templateEditorHeader}>
+            <label>{TYPE_LABELS[t.type] || t.type}</label>
+            <button
+              type="button"
+              className={s.btnOutline}
+              onClick={() => setSendTarget(t)}
+              style={{ padding: '8px 14px', fontSize: '0.8rem' }}
+            >
+              <Send size={14} />
+              Enviar
+            </button>
+          </div>
           <textarea
             className={s.textarea}
             value={t.content}
@@ -86,6 +100,14 @@ export default function WhatsAppTemplateEditor() {
           </div>
         </div>
       ))}
+
+      <WhatsAppSendTemplateModal
+        isOpen={Boolean(sendTarget)}
+        onClose={() => setSendTarget(null)}
+        templateType={sendTarget?.type}
+        templateLabel={sendTarget ? TYPE_LABELS[sendTarget.type] || sendTarget.type : ''}
+        templateContent={sendTarget?.content}
+      />
     </div>
   );
 }

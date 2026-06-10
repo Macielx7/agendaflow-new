@@ -106,7 +106,42 @@
   background: rgba(255,255,255,0.02); border: 1px solid var(--border);
 }
 
+.templateEditorHeader {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+
 .templateEditor label { font-size: 0.8rem; font-weight: 600; color: #4ade80; }
+
+.sendSearch {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: var(--radius-md);
+  border: 1px solid var(--border); background: var(--bg-base);
+}
+
+.sendSearch input {
+  flex: 1; border: none; background: transparent; color: var(--text-primary);
+  font-size: 0.875rem; outline: none;
+}
+
+.clientList {
+  margin-top: 12px; max-height: 280px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+}
+
+.clientOption {
+  display: block; width: 100%; text-align: left;
+  padding: 12px 16px; border: none; border-bottom: 1px solid var(--border);
+  background: transparent; color: var(--text-primary); cursor: pointer;
+  transition: background 0.15s;
+}
+
+.clientOption:last-child { border-bottom: none; }
+.clientOption:hover { background: var(--bg-hover); }
+
+.clientOptionActive {
+  background: rgba(37, 211, 102, 0.12);
+  box-shadow: inset 3px 0 0 #25d366;
+}
 
 .textarea {
   width: 100%; min-height: 100px; padding: 12px 14px;

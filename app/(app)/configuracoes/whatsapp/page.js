@@ -10,6 +10,8 @@ import WhatsAppTemplateEditor from '@/components/whatsapp/WhatsAppTemplateEditor
 import WhatsAppAutomationCard from '@/components/whatsapp/WhatsAppAutomationCard';
 import WhatsAppMessagesTable from '@/components/whatsapp/WhatsAppMessagesTable';
 import WhatsAppLogsTable from '@/components/whatsapp/WhatsAppLogsTable';
+import AISettingsCard from '@/components/ai/AISettingsCard';
+import AIMetricsCards from '@/components/ai/AIMetricsCards';
 import saas from '@/styles/saas.module.css';
 import s from '@/styles/whatsapp.module.css';
 
@@ -17,6 +19,7 @@ const TABS = [
   { id: 'conexao', label: 'Conexão' },
   { id: 'templates', label: 'Templates' },
   { id: 'automacoes', label: 'Automações' },
+  { id: 'ia', label: 'Respostas Inteligentes' },
   { id: 'mensagens', label: 'Mensagens' },
   { id: 'logs', label: 'Logs' },
 ];
@@ -76,6 +79,12 @@ export default function WhatsAppConfigPage() {
       )}
       {tab === 'automacoes' && (
         <WhatsAppAutomationCard settings={settings} onSaved={refresh} />
+      )}
+      {tab === 'ia' && (
+        <>
+          <AIMetricsCards />
+          <AISettingsCard />
+        </>
       )}
       {tab === 'mensagens' && (
         <div className={s.waCard}>

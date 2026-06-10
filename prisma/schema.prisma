@@ -58,6 +58,7 @@ enum WhatsappConnectionStatus {
 }
 
 enum WhatsappMessageType {
+  BOOKING
   CONFIRMATION
   REMINDER
   CANCELLATION
@@ -73,6 +74,7 @@ enum WhatsappMessageStatus {
 }
 
 enum WhatsappTemplateType {
+  BOOKING
   CONFIRMATION
   REMINDER
   CANCELLATION
@@ -141,6 +143,12 @@ model Tenant {
   whatsappTemplates WhatsappTemplate[]
   whatsappMessages WhatsappMessage[]
   whatsappLogs     WhatsappLog[]
+  aiSettings       AiSettings?
+  knowledgeBase    KnowledgeBase[]
+  faqEntries       FaqEntry[]
+  conversationContexts ConversationContext[]
+  intentLogs       IntentLog[]
+  chatSessions     ChatSession[]
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
 
@@ -367,6 +375,7 @@ model WhatsappSettings {
   id                    String   @id @default(cuid())
   tenantId              String   @unique
   tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  bookingsEnabled       Boolean  @default(true)
   confirmationsEnabled  Boolean  @default(true)
   remindersEnabled      Boolean  @default(true)
   cancellationsEnabled  Boolean  @default(true)
@@ -426,4 +435,107 @@ model WhatsappLog {
   @@index([tenantId])
   @@index([createdAt])
   @@map("whatsapp_logs")
+}
+
+model AiSettings {
+  id                  String   @id @default(cuid())
+  tenantId            String   @unique
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  enabled             Boolean  @default(false)
+  autoReplyEnabled    Boolean  @default(true)
+  allowCancellations  Boolean  @default(false)
+  allowReschedules    Boolean  @default(false)
+  transferToHuman     Boolean  @default(true)
+  confidenceThreshold Float    @default(0.45)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("ai_settings")
+}
+
+model KnowledgeBase {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  question  String   @db.Text
+  answer    String   @db.Text
+  keywords  String?  @db.Text
+  category  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("knowledge_base")
+}
+
+model FaqEntry {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  question           String   @db.Text
+  answer             String   @db.Text
+  normalizedQuestion String   @db.Text
+  keywords           String?  @db.Text
+  knowledgeId        String?
+  isSystem           Boolean  @default(false)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("faq_entries")
+}
+
+model ConversationContext {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  clientPhone String
+  clientId    String?
+  messages    String   @db.Text
+  lastIntent  String?
+  lastTopic   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, clientPhone])
+  @@index([tenantId])
+  @@map("conversation_context")
+}
+
+model IntentLog {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  clientPhone String
+  intent      String
+  confidence  Float
+  message     String   @db.Text
+  response    String?  @db.Text
+  matched     Boolean  @default(false)
+  transferred Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("intent_logs")
+}
+
+model ChatSession {
+  id            String    @id @default(cuid())
+  tenantId      String
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  clientPhone   String
+  clientId      String?
+  status        String    @default("BOT")
+  transferredAt DateTime?
+  closedAt      DateTime?
+  lastMessageAt DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([tenantId, clientPhone])
+  @@index([tenantId])
+  @@map("chat_sessions")
 }

@@ -447,6 +447,17 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
+.btnWhatsapp {
+  border-color: rgba(37, 211, 102, 0.45);
+  color: #25d366;
+  background: rgba(37, 211, 102, 0.08);
+}
+
+.btnWhatsapp:hover:not(:disabled) {
+  background: rgba(37, 211, 102, 0.16);
+  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.2);
+}
+
 .durationModal {
   display: flex;
   flex-direction: column;

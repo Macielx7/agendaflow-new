@@ -7,7 +7,8 @@ import { useToast } from '@/context/ToastContext';
 import s from '@/styles/whatsapp.module.css';
 
 const AUTOMATIONS = [
-  { key: 'confirmationsEnabled', label: 'Confirmação de agendamento', desc: 'Ao criar ou confirmar consulta' },
+  { key: 'bookingsEnabled', label: 'Agendamento realizado', desc: 'Ao criar um novo agendamento' },
+  { key: 'confirmationsEnabled', label: 'Solicitar confirmação', desc: 'Cliente responde confirmar ou cancelar no WhatsApp' },
   { key: 'remindersEnabled', label: 'Lembrete automático', desc: 'Horas antes da consulta' },
   { key: 'cancellationsEnabled', label: 'Cancelamento', desc: 'Quando agendamento for cancelado' },
   { key: 'reschedulesEnabled', label: 'Reagendamento', desc: 'Ao alterar data ou horário' },

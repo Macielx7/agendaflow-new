@@ -24,6 +24,7 @@ export async function PATCH(request) {
 
   const data = {};
   const boolFields = [
+    'bookingsEnabled',
     'confirmationsEnabled',
     'remindersEnabled',
     'cancellationsEnabled',

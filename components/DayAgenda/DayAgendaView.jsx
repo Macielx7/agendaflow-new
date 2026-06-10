@@ -12,6 +12,7 @@ import DurationModal from './DurationModal';
 import AppointmentModal from '@/components/AppointmentModal/AppointmentModal';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog';
 import { api } from '@/services/api';
+import { whatsappApi } from '@/services/whatsapp/api';
 import { useToast } from '@/context/ToastContext';
 import { VALID_STATUSES, STATUS_LABELS } from '@/lib/validations';
 import s from '@/styles/saas.module.css';
@@ -33,6 +34,7 @@ export default function DayAgendaView({ date }) {
   const [clients, setClients] = useState([]);
   const [services, setServices] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [sendingConfirmationId, setSendingConfirmationId] = useState(null);
 
   const dateObj = useMemo(() => parse(date, 'yyyy-MM-dd', new Date()), [date]);
 
@@ -108,6 +110,22 @@ export default function DayAgendaView({ date }) {
       toast.success('Agendamento criado');
     }
     load();
+  };
+
+  const handleSendConfirmation = async (appointment) => {
+    if (!appointment?.client?.phone) {
+      toast.error('Cliente sem telefone cadastrado');
+      return;
+    }
+    setSendingConfirmationId(appointment.id);
+    try {
+      await whatsappApi.sendConfirmation(appointment.id);
+      toast.success(`Confirmação enviada para ${appointment.client.name}`);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSendingConfirmationId(null);
+    }
   };
 
   const handleDeleteAppointment = async () => {
@@ -240,6 +258,8 @@ export default function DayAgendaView({ date }) {
                     <AppointmentCard
                       appointment={apt}
                       loading={actionLoading === apt.id || draggingId === apt.id}
+                      sendingConfirmation={sendingConfirmationId === apt.id}
+                      onSendConfirmation={handleSendConfirmation}
                       onPresence={() => handleAction(apt.id, 'presence')}
                       onNoShow={() => handleAction(apt.id, 'no_show')}
                       onEditTime={() => setDurationModal(apt)}

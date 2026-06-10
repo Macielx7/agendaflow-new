@@ -1,5 +1,6 @@
 'use client';
 
+import { Loader2, MessageCircle } from 'lucide-react';
 import { STATUS_COLORS, STATUS_LABELS } from '@/lib/validations';
 import styles from './DayAgenda.module.css';
 
@@ -21,6 +22,8 @@ export default function AppointmentCard({
   onFinish,
   onEdit,
   onDelete,
+  onSendConfirmation,
+  sendingConfirmation,
   onDragStart,
   onDragEnd,
   loading,
@@ -28,6 +31,8 @@ export default function AppointmentCard({
   const duration = appointment.effectiveDuration ?? appointment.duration ?? appointment.service?.duration ?? 60;
   const isInactive = ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(appointment.status);
   const statusColor = STATUS_COLORS[appointment.status] || '#6366f1';
+  const canSendConfirmation =
+    !isInactive && Boolean(appointment.client?.phone) && Boolean(onSendConfirmation);
 
   return (
     <div
@@ -77,6 +82,22 @@ export default function AppointmentCard({
       )}
 
       <div className={styles.actions}>
+        {canSendConfirmation && (
+          <button
+            type="button"
+            className={`${styles.actionBtn} ${styles.btnWhatsapp}`}
+            onClick={() => onSendConfirmation(appointment)}
+            disabled={loading || sendingConfirmation}
+            title="Enviar mensagem de confirmação no WhatsApp"
+          >
+            {sendingConfirmation ? (
+              <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <MessageCircle size={14} />
+            )}
+            {sendingConfirmation ? 'Enviando...' : 'Confirmar WhatsApp'}
+          </button>
+        )}
         {!isInactive && (
           <>
             <button

@@ -19,6 +19,10 @@ export const whatsappApi = {
   templates: () => request('/api/whatsapp/templates'),
   saveTemplates: (templates) =>
     request('/api/whatsapp/templates', { method: 'PUT', body: JSON.stringify({ templates }) }),
+  sendTemplate: (body) =>
+    request('/api/whatsapp/templates/send', { method: 'POST', body: JSON.stringify(body) }),
+  sendConfirmation: (appointmentId) =>
+    request(`/api/whatsapp/appointments/${appointmentId}/confirmation`, { method: 'POST' }),
   settings: () => request('/api/whatsapp/settings'),
   updateSettings: (body) =>
     request('/api/whatsapp/settings', { method: 'PATCH', body: JSON.stringify(body) }),

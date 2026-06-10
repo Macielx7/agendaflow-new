@@ -18,6 +18,7 @@ const TITLES = {
   '/horarios': 'Horários',
   '/configuracoes': 'Configurações',
   '/configuracoes/whatsapp': 'WhatsApp',
+  '/configuracoes/ia': 'IA · Conhecimento',
   '/perfil': 'Perfil',
 };
 
