@@ -5,7 +5,13 @@ import { Save, Plus, Trash2 } from 'lucide-react';
 import { api } from '@/services/api';
 import { useToast } from '@/context/ToastContext';
 import { WEEKDAYS_FULL } from '@/utils/constants';
+import { InputData, InputHora, InputText } from '@/components/FormInput';
+import formInputStyles from '@/components/FormInput/FormField.module.css';
+import { dateBRToISO, maskTime, onlyDigits } from '@/utils/masks';
 import s from '@/styles/saas.module.css';
+
+const timeToDigits = (t) => onlyDigits(t || '', 4);
+const digitsToTime = (d) => maskTime(d);
 
 const DEFAULT_SCHEDULES = Array.from({ length: 7 }, (_, i) => ({
   dayOfWeek: i,
@@ -21,7 +27,7 @@ export default function HorariosPage() {
   const toast = useToast();
   const [schedules, setSchedules] = useState(DEFAULT_SCHEDULES);
   const [holidays, setHolidays] = useState([]);
-  const [holidayDate, setHolidayDate] = useState('');
+  const [holidayDateDigits, setHolidayDateDigits] = useState('');
   const [holidayName, setHolidayName] = useState('');
   const [maxPerDay, setMaxPerDay] = useState('12');
   const [saving, setSaving] = useState(false);
@@ -63,9 +69,10 @@ export default function HorariosPage() {
   };
 
   const addHoliday = async () => {
-    if (!holidayDate) return;
-    await api.createHoliday({ date: holidayDate, name: holidayName || 'Feriado' });
-    setHolidayDate('');
+    const iso = dateBRToISO(holidayDateDigits);
+    if (!iso) return;
+    await api.createHoliday({ date: iso, name: holidayName || 'Feriado' });
+    setHolidayDateDigits('');
     setHolidayName('');
     const d = await api.holidays();
     setHolidays(d.holidays);
@@ -101,22 +108,38 @@ export default function HorariosPage() {
                   Ativo
                 </label>
               </div>
-              <div className={s.formGroup} style={{ margin: 0 }}>
-                <label className={s.label}>Abertura</label>
-                <input type="time" className={s.input} value={sched.startTime} onChange={(e) => updateSchedule(i, 'startTime', e.target.value)} disabled={!sched.active} />
-              </div>
-              <div className={s.formGroup} style={{ margin: 0 }}>
-                <label className={s.label}>Fechamento</label>
-                <input type="time" className={s.input} value={sched.endTime} onChange={(e) => updateSchedule(i, 'endTime', e.target.value)} disabled={!sched.active} />
-              </div>
-              <div className={s.formGroup} style={{ margin: 0 }}>
-                <label className={s.label}>Intervalo</label>
-                <input type="time" className={s.input} value={sched.breakStart || ''} onChange={(e) => updateSchedule(i, 'breakStart', e.target.value)} disabled={!sched.active} />
-              </div>
-              <div className={s.formGroup} style={{ margin: 0 }}>
-                <label className={s.label}>Até</label>
-                <input type="time" className={s.input} value={sched.breakEnd || ''} onChange={(e) => updateSchedule(i, 'breakEnd', e.target.value)} disabled={!sched.active} />
-              </div>
+              <InputHora
+                label="Abertura"
+                className={formInputStyles.compact}
+                value={timeToDigits(sched.startTime)}
+                onChange={(d) => updateSchedule(i, 'startTime', digitsToTime(d))}
+                disabled={!sched.active}
+                required={false}
+              />
+              <InputHora
+                label="Fechamento"
+                className={formInputStyles.compact}
+                value={timeToDigits(sched.endTime)}
+                onChange={(d) => updateSchedule(i, 'endTime', digitsToTime(d))}
+                disabled={!sched.active}
+                required={false}
+              />
+              <InputHora
+                label="Intervalo"
+                className={formInputStyles.compact}
+                value={timeToDigits(sched.breakStart)}
+                onChange={(d) => updateSchedule(i, 'breakStart', digitsToTime(d))}
+                disabled={!sched.active}
+                required={false}
+              />
+              <InputHora
+                label="Até"
+                className={formInputStyles.compact}
+                value={timeToDigits(sched.breakEnd)}
+                onChange={(d) => updateSchedule(i, 'breakEnd', digitsToTime(d))}
+                disabled={!sched.active}
+                required={false}
+              />
               <div className={s.formGroup} style={{ margin: 0 }}>
                 <label className={s.label}>Slot (min)</label>
                 <input type="number" className={s.input} value={sched.slotDuration} onChange={(e) => updateSchedule(i, 'slotDuration', parseInt(e.target.value, 10))} disabled={!sched.active} />
@@ -136,9 +159,23 @@ export default function HorariosPage() {
       <div className={s.card}>
         <div className={s.cardHeader}><h2 className={s.cardTitle}>Feriados</h2></div>
         <div className={s.cardBody}>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
-            <input type="date" className={s.input} value={holidayDate} onChange={(e) => setHolidayDate(e.target.value)} style={{ width: 'auto' }} />
-            <input className={s.input} placeholder="Nome do feriado" value={holidayName} onChange={(e) => setHolidayName(e.target.value)} style={{ flex: 1, minWidth: 160 }} />
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20, alignItems: 'flex-end' }}>
+            <div style={{ flex: '0 1 180px', minWidth: 160 }}>
+              <InputData
+                label="Data do feriado"
+                value={holidayDateDigits}
+                onChange={setHolidayDateDigits}
+                required={false}
+              />
+            </div>
+            <div style={{ flex: 1, minWidth: 160 }}>
+              <InputText
+                label="Nome do feriado"
+                value={holidayName}
+                onChange={setHolidayName}
+                validate={() => null}
+              />
+            </div>
             <button type="button" className={s.btnSecondary} onClick={addHoliday}><Plus size={16} /> Adicionar</button>
           </div>
           {holidays.map((h) => (

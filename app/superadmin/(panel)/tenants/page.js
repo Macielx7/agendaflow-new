@@ -8,6 +8,7 @@ import Modal from '@/components/Modal/Modal';
 import { superApi } from '@/services/superadminApi';
 import { useToast } from '@/context/ToastContext';
 import { TENANT_STATUS } from '@/utils/superConstants';
+import { InputText, InputEmail, InputWhatsApp } from '@/components/FormInput';
 import s from '@/styles/superadmin.module.css';
 
 export default function TenantsPage() {
@@ -82,10 +83,10 @@ export default function TenantsPage() {
       </div>
       <Modal isOpen={modal} onClose={() => setModal(false)} title="Nova conta SaaS" size="md">
         <form onSubmit={create}>
-          <div className={s.formGroup}><label className={s.label}>Empresa</label><input className={s.input} value={form.companyName} onChange={(e) => setF('companyName', e.target.value)} required /></div>
-          <div className={s.formGroup}><label className={s.label}>Responsável</label><input className={s.input} value={form.ownerName} onChange={(e) => setF('ownerName', e.target.value)} /></div>
-          <div className={s.formGroup}><label className={s.label}>E-mail admin</label><input type="email" className={s.input} value={form.email} onChange={(e) => setF('email', e.target.value)} required /></div>
-          <div className={s.formGroup}><label className={s.label}>WhatsApp</label><input className={s.input} value={form.phone} onChange={(e) => setF('phone', e.target.value)} /></div>
+          <InputText label="Empresa" value={form.companyName} onChange={(v) => setF('companyName', v)} required />
+          <InputText label="Responsável" value={form.ownerName} onChange={(v) => setF('ownerName', v)} validate={() => null} />
+          <InputEmail label="E-mail admin" value={form.email} onChange={(v) => setF('email', v)} required />
+          <InputWhatsApp label="WhatsApp" value={form.phone} onChange={(v) => setF('phone', v)} required={false} />
           <div className={s.formGroup}><label className={s.label}>Plano</label><select className={s.select} value={form.planId} onChange={(e) => setF('planId', e.target.value)} required><option value="">Selecione</option>{plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
           <div className={s.formGroup}><label className={s.label}>Senha inicial</label><input className={s.input} value={form.adminPassword} onChange={(e) => setF('adminPassword', e.target.value)} /></div>
           <button type="submit" className={s.btnPrimary}>Criar conta</button>

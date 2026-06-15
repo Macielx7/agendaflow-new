@@ -1,0 +1,12 @@
+export { default as FormField } from './FormField';
+export { default as InputCPF } from './InputCPF';
+export { default as InputCNPJ } from './InputCNPJ';
+export { default as InputTelefone } from './InputTelefone';
+export { default as InputWhatsApp } from './InputWhatsApp';
+export { default as InputMoeda } from './InputMoeda';
+export { default as InputCEP } from './InputCEP';
+export { default as InputData } from './InputData';
+export { default as InputHora } from './InputHora';
+export { default as InputEmail } from './InputEmail';
+export { default as InputText } from './InputText';
+export { default as InputPercentual } from './InputPercentual';

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LogIn, Loader2, Eye, EyeOff } from 'lucide-react';
 import { api } from '@/services/api';
+import { InputEmail } from '@/components/FormInput';
 import s from '@/styles/saas.module.css';
 
 export default function LoginForm() {
@@ -37,15 +38,23 @@ export default function LoginForm() {
           {error}
         </div>
       )}
+      <InputEmail label="E-mail" value={email} onChange={setEmail} required />
       <div className={s.formGroup}>
-        <label className={s.label}>E-mail</label>
-        <input type="email" className={s.input} value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
-      </div>
-      <div className={s.formGroup}>
-        <label className={s.label}>Senha</label>
+        <label className={s.label}>Senha *</label>
         <div style={{ position: 'relative' }}>
-          <input type={show ? 'text' : 'password'} className={s.input} value={password} onChange={(e) => setPassword(e.target.value)} required style={{ paddingRight: 44 }} />
-          <button type="button" onClick={() => setShow(!show)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
+          <input
+            type={show ? 'text' : 'password'}
+            className={s.input}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{ paddingRight: 44 }}
+          />
+          <button
+            type="button"
+            onClick={() => setShow(!show)}
+            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
+          >
             {show ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>

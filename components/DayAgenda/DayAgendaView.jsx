@@ -143,6 +143,16 @@ export default function DayAgendaView({ date }) {
   };
 
   const appointments = data?.appointments || [];
+  const hasAvailableSlots = data?.hasAvailableSlots ?? false;
+
+  const openNewAppointment = () => {
+    if (!hasAvailableSlots) {
+      toast.error('Sem horários disponíveis nesta data');
+      return;
+    }
+    setSelected(null);
+    setAppointmentModal(true);
+  };
 
   return (
     <div className={styles.dayPage}>
@@ -205,10 +215,8 @@ export default function DayAgendaView({ date }) {
         <button
           type="button"
           className={s.btnPrimary}
-          onClick={() => {
-            setSelected(null);
-            setAppointmentModal(true);
-          }}
+          onClick={openNewAppointment}
+          style={!hasAvailableSlots ? { opacity: 0.6 } : undefined}
         >
           <Plus size={18} /> Novo agendamento
         </button>
@@ -234,16 +242,22 @@ export default function DayAgendaView({ date }) {
             <AnimatePresence mode="popLayout">
               {appointments.length === 0 ? (
                 <div className={styles.emptyState}>
-                  Nenhum agendamento neste dia.
-                  <br />
-                  <button
-                    type="button"
-                    className={s.btnPrimary}
-                    style={{ marginTop: 16 }}
-                    onClick={() => setAppointmentModal(true)}
-                  >
-                    Adicionar agendamento
-                  </button>
+                  {hasAvailableSlots ? (
+                    <>
+                      Nenhum agendamento neste dia.
+                      <br />
+                      <button
+                        type="button"
+                        className={s.btnPrimary}
+                        style={{ marginTop: 16 }}
+                        onClick={openNewAppointment}
+                      >
+                        Adicionar agendamento
+                      </button>
+                    </>
+                  ) : (
+                    'Sem horários disponíveis nesta data'
+                  )}
                 </div>
               ) : (
                 appointments.map((apt, i) => (

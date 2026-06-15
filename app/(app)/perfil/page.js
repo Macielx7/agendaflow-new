@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Save, Loader2 } from 'lucide-react';
+import { Save, Loader2, User } from 'lucide-react';
 import { api } from '@/services/api';
 import { useToast } from '@/context/ToastContext';
+import { InputText } from '@/components/FormInput';
 import s from '@/styles/saas.module.css';
 
 export default function PerfilPage() {
@@ -52,10 +53,7 @@ export default function PerfilPage() {
               <label className={s.label}>E-mail</label>
               <input className={s.input} value={user?.email || ''} disabled style={{ opacity: 0.6 }} />
             </div>
-            <div className={s.formGroup}>
-              <label className={s.label}>Nome</label>
-              <input className={s.input} value={name} onChange={(e) => setName(e.target.value)} required />
-            </div>
+            <InputText label="Nome" icon={User} value={name} onChange={setName} required />
             <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '28px 0' }} />
             <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: 16 }}>Alterar senha</p>
             <div className={s.formGroup}>

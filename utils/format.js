@@ -18,6 +18,12 @@ export function formatCurrency(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num);
 }
 
+export function formatCPF(cpf) {
+  const c = (cpf || '').replace(/\D/g, '');
+  if (c.length !== 11) return cpf || '';
+  return `${c.slice(0, 3)}.${c.slice(3, 6)}.${c.slice(6, 9)}-${c.slice(9)}`;
+}
+
 export function formatPhone(phone) {
   const c = (phone || '').replace(/\D/g, '');
   if (c.length === 11) return `(${c.slice(0, 2)}) ${c.slice(2, 7)}-${c.slice(7)}`;

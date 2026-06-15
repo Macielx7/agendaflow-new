@@ -1,4 +1,5 @@
 import LoginForm from '@/components/LoginForm/LoginForm';
+import ThemeToggleFloating from '@/components/ThemeToggle/ThemeToggleFloating';
 import { APP_NAME } from '@/utils/constants';
 import s from '@/styles/saas.module.css';
 
@@ -7,6 +8,7 @@ export const metadata = { title: `Login | ${APP_NAME}` };
 export default function LoginPage() {
   return (
     <div className={s.loginPage}>
+      <ThemeToggleFloating />
       <div className={s.loginCard}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{

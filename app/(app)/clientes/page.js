@@ -6,7 +6,7 @@ import ClientModal from '@/components/ClientModal/ClientModal';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog';
 import { api } from '@/services/api';
 import { useToast } from '@/context/ToastContext';
-import { formatPhone, formatDateShort } from '@/utils/format';
+import { formatPhone, formatDateShort, formatCPF } from '@/utils/format';
 import s from '@/styles/saas.module.css';
 
 const CLIENT_FILTERS = [
@@ -99,7 +99,7 @@ export default function ClientesPage() {
               <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
                 className={s.filterInput}
-                placeholder="Buscar nome, telefone..."
+                placeholder="Buscar nome, CPF, telefone..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 style={{ paddingLeft: 36, width: '100%' }}
@@ -164,8 +164,8 @@ export default function ClientesPage() {
                     <span className={s.badge} style={{ fontSize: '0.7rem', background: 'rgba(156,163,175,0.15)', color: '#9ca3af' }}>Sem agendamentos</span>
                   )}
                 </div>
+                {c.cpf && <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{formatCPF(c.cpf)}</p>}
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{formatPhone(c.phone)}</p>
-                {c.age != null && <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{c.age} anos</p>}
                 {c.email && <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{c.email}</p>}
                 <div style={{ fontSize: '0.78rem', marginTop: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
                   <p><strong style={{ color: 'var(--text-secondary)' }}>Cadastrado em:</strong> {formatDateShort(c.createdAt)}</p>

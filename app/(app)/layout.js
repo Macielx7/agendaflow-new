@@ -15,6 +15,16 @@ const TITLES = {
   '/agendamentos': 'Agendamentos',
   '/clientes': 'Clientes',
   '/servicos': 'Serviços',
+  '/financeiro': 'Financeiro',
+  '/financeiro/receber': 'Contas a Receber',
+  '/financeiro/pagar': 'Contas a Pagar',
+  '/financeiro/fluxo': 'Fluxo de Caixa',
+  '/financeiro/parcelamentos': 'Parcelamentos',
+  '/financeiro/orcamentos': 'Orçamentos',
+  '/financeiro/comissoes': 'Comissões',
+  '/financeiro/categorias': 'Categorias',
+  '/financeiro/relatorios': 'Relatórios',
+  '/financeiro/inadimplencia': 'Inadimplência',
   '/horarios': 'Horários',
   '/configuracoes': 'Configurações',
   '/configuracoes/whatsapp': 'WhatsApp',
@@ -31,7 +41,7 @@ export default function AppLayout({ children }) {
     api.me().then((d) => setUser(d.user)).catch(() => {});
   }, []);
 
-  const title = TITLES[pathname] || 'AgendaPro';
+  const title = TITLES[pathname] || (pathname.startsWith('/financeiro') ? 'Financeiro' : 'AgendaPro');
 
   return (
     <ToastProvider>

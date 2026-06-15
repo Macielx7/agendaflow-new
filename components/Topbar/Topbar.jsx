@@ -1,6 +1,7 @@
 'use client';
 
 import { Menu } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle/ThemeToggle';
 import s from '@/styles/saas.module.css';
 
 export default function Topbar({ title, user, onMenuClick }) {
@@ -14,6 +15,7 @@ export default function Topbar({ title, user, onMenuClick }) {
         <h2 className={s.topbarTitle}>{title}</h2>
       </div>
       <div className={s.topbarUser}>
+        <ThemeToggle />
         <span>{user?.name || 'Admin'}</span>
         <div className={s.avatar}>{initial}</div>
       </div>

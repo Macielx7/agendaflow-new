@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/services/api';
+import ThemeToggleFloating from '@/components/ThemeToggle/ThemeToggleFloating';
 import s from '@/styles/saas.module.css';
 
 function Form() {
@@ -45,6 +46,7 @@ function Form() {
 export default function RedefinirSenhaPage() {
   return (
     <div className={s.loginPage}>
+      <ThemeToggleFloating />
       <div className={s.loginCard}>
         <h1 className={s.loginTitle}>Nova senha</h1>
         <Suspense fallback={<p>Carregando...</p>}><Form /></Suspense>

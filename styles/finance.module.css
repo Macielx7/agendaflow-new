@@ -1,0 +1,277 @@
+.financeWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.subNav {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.subNav::-webkit-scrollbar { display: none; }
+
+.subNavItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.subNavItem:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.subNavActive {
+  color: var(--accent-hover);
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+@media (min-width: 900px) {
+  .kpiGrid { grid-template-columns: repeat(5, 1fr); }
+}
+
+.finCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.finCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.finCardLabel {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.finCardValue {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.finCardSub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.positive { color: #22c55e; }
+.negative { color: #ef4444; }
+.warning { color: #f59e0b; }
+
+.chartGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .chartGrid { grid-template-columns: 1fr 1fr; }
+}
+
+.chartBox {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.chartTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.barChart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 160px;
+  padding-top: 8px;
+}
+
+.barCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.bar {
+  width: 100%;
+  max-width: 36px;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, var(--accent-hover), var(--accent));
+  min-height: 4px;
+  transition: height 0.4s ease;
+}
+
+.barLabel {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.hBarRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.hBarLabel {
+  font-size: 0.8rem;
+  min-width: 100px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.hBarTrack {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.hBarFill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  transition: width 0.5s ease;
+}
+
+.hBarValue {
+  font-size: 0.78rem;
+  font-weight: 600;
+  min-width: 72px;
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.statusPENDING { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.statusPAID { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.statusOVERDUE { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.statusCANCELLED { background: rgba(156, 163, 175, 0.15); color: #9ca3af; }
+.statusPARTIAL { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+
+.skeleton {
+  animation: pulse 1.5s ease-in-out infinite;
+  background: var(--bg-elevated);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.cashSummary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.cashBox {
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+
+.cashBox h4 {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.cashBox strong {
+  font-size: 1.2rem;
+}
+
+.filterPills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filterPill {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filterPill:hover, .filterPillActive {
+  border-color: var(--accent);
+  color: var(--accent-hover);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  color: var(--accent-hover);
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.iconBtnDanger { color: #f87171; }
+
+.tableWrap {
+  overflow-x: auto;
+  width: 100%;
+}

@@ -4,6 +4,7 @@ import { startOfDay } from 'date-fns';
 import prisma from '@/lib/prisma';
 import { requireTenantId } from '@/lib/tenant';
 import { getDayScheduleContext, getAppointmentDuration, getEndTime } from '@/lib/scheduleEngine';
+import { getAvailableSlots } from '@/lib/slots';
 import { jsonResponse, errorResponse } from '@/lib/api';
 
 const include = { client: true, service: true };
@@ -45,6 +46,12 @@ export async function GET(request) {
 
   const activeCount = ctx.activeAppointments.length;
 
+  let bookableSlots = [];
+  if (ctx.schedule) {
+    const { slots } = await getAvailableSlots(date, tenantId, ctx.schedule.slotDuration);
+    bookableSlots = slots;
+  }
+
   return jsonResponse({
     success: true,
     date,
@@ -57,10 +64,11 @@ export async function GET(request) {
       : null,
     appointments,
     timeline: ctx.timeline,
-    freeSlots: ctx.freeSlots,
+    freeSlots: bookableSlots,
+    hasAvailableSlots: bookableSlots.length > 0,
     stats: {
       total: activeCount,
-      freeSlots: ctx.freeSlots.length,
+      freeSlots: bookableSlots.length,
       completed: ctx.appointments.filter((a) => a.status === 'COMPLETED').length,
       noShow: ctx.appointments.filter((a) => a.status === 'NO_SHOW').length,
     },

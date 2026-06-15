@@ -24,8 +24,13 @@ export async function PATCH(request, { params }) {
   if (!validation.valid) return errorResponse(validation.errors.join('. '));
   const existing = await prisma.client.findFirst({ where: { id: params.id, tenantId } });
   if (!existing) return errorResponse('Cliente não encontrado', 404);
-  const client = await prisma.client.update({ where: { id: params.id }, data: validation.data });
-  return jsonResponse({ success: true, client });
+  try {
+    const client = await prisma.client.update({ where: { id: params.id }, data: validation.data });
+    return jsonResponse({ success: true, client });
+  } catch (err) {
+    if (err.code === 'P2002') return errorResponse('CPF já cadastrado para este cliente');
+    throw err;
+  }
 }
 
 export async function DELETE(request, { params }) {

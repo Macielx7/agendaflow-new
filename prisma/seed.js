@@ -102,6 +102,7 @@ async function main() {
     { key: 'company_name', value: 'Clínica Premium', label: 'Nome da empresa' },
     { key: 'company_phone', value: '(11) 99999-9999', label: 'WhatsApp' },
     { key: 'company_email', value: adminEmail, label: 'E-mail' },
+    { key: 'company_address', value: 'Av. Paulista, 1000 — Sala 42, Bela Vista, São Paulo/SP', label: 'Endereço' },
     { key: 'max_appointments_per_day', value: '12', label: 'Máx. agendamentos/dia' },
   ];
 
@@ -122,9 +123,13 @@ async function main() {
     });
   }
 
+  const { seedAiKnowledgeForTenant } = await import('./seedAiKnowledge.js');
+  const knowledgeCount = await seedAiKnowledgeForTenant(prisma, tenant.id);
+
   console.log('✅ Seed OK');
   console.log('   Tenant admin:', adminEmail, '/', adminPassword);
   console.log('   Super admin:', superEmail, '/', superPass);
+  console.log('   Base de conhecimento IA:', knowledgeCount, 'entradas');
 }
 
 main()

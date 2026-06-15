@@ -1,4 +1,14 @@
-:root {
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --background: #09090b;
+  --surface: #111113;
+  --card: #18181b;
+  --sidebar: #111113;
+  --navbar: rgba(9, 9, 11, 0.8);
+  --hover: #27272a;
+
   --bg-base: #09090b;
   --bg-elevated: #111113;
   --bg-card: #18181b;
@@ -15,6 +25,54 @@
   --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
+
+  --topbar-bg: rgba(9, 9, 11, 0.8);
+  --mobile-nav-bg: rgba(17, 17, 19, 0.95);
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+  --card-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+  --modal-shadow: 0 32px 80px rgba(0, 0, 0, 0.5);
+  --nav-active-bg: rgba(99, 102, 241, 0.15);
+  --nav-active-border: rgba(99, 102, 241, 0.25);
+  --brand-gradient: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+  --table-hover: rgba(99, 102, 241, 0.04);
+  --logout-hover-bg: rgba(239, 68, 68, 0.1);
+  --logout-hover-color: #fca5a5;
+
+  --sa-bg-base: #050508;
+  --sa-sidebar-bg: linear-gradient(180deg, #0c0c12 0%, #08080e 100%);
+  --sa-sidebar-border: rgba(6, 182, 212, 0.12);
+  --sa-sidebar-brand-border: rgba(255, 255, 255, 0.06);
+  --sa-topbar-bg: rgba(5, 5, 8, 0.85);
+  --sa-topbar-border: rgba(255, 255, 255, 0.06);
+  --sa-card-bg: rgba(12, 12, 18, 0.8);
+  --sa-card-border: rgba(255, 255, 255, 0.06);
+  --sa-stat-bg: rgba(12, 12, 18, 0.9);
+  --sa-input-bg: rgba(0, 0, 0, 0.3);
+  --sa-input-border: rgba(255, 255, 255, 0.1);
+  --sa-text: #fafafa;
+  --sa-text-secondary: #d4d4d8;
+  --sa-text-muted: #71717a;
+  --sa-text-label: #a1a1aa;
+  --sa-nav-color: #71717a;
+  --sa-nav-hover-bg: rgba(6, 182, 212, 0.08);
+  --sa-nav-hover-color: #e4e4e7;
+  --sa-nav-active-bg: rgba(6, 182, 212, 0.15);
+  --sa-nav-active-color: #22d3ee;
+  --sa-nav-active-border: rgba(6, 182, 212, 0.25);
+  --sa-btn-secondary-bg: rgba(255, 255, 255, 0.05);
+  --sa-btn-secondary-border: rgba(255, 255, 255, 0.1);
+  --sa-btn-secondary-color: #e4e4e7;
+  --sa-table-th-bg: rgba(0, 0, 0, 0.2);
+  --sa-table-th-color: #52525b;
+  --sa-table-hover: rgba(6, 182, 212, 0.04);
+  --sa-login-card-bg: rgba(12, 12, 18, 0.95);
+  --sa-login-card-border: rgba(6, 182, 212, 0.2);
+  --sa-login-glow: rgba(6, 182, 212, 0.15);
+  --sa-plan-card-bg: rgba(0, 0, 0, 0.2);
+  --sa-plan-card-border: rgba(255, 255, 255, 0.08);
+  --sa-mobile-card-bg: rgba(0, 0, 0, 0.3);
+  --sa-menu-toggle-bg: rgba(255, 255, 255, 0.05);
+
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -22,6 +80,83 @@
   --sidebar-width: 260px;
   --topbar-height: 64px;
   --font-sans: var(--font-inter), system-ui, sans-serif;
+  --shadow-glow: 0 0 40px var(--accent-glow);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --background: #f4f4f5;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --sidebar: #ffffff;
+  --navbar: rgba(255, 255, 255, 0.88);
+  --hover: #f4f4f5;
+
+  --bg-base: #f4f4f5;
+  --bg-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --bg-hover: #f4f4f5;
+  --bg-input: #fafafa;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.14);
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-glow: rgba(99, 102, 241, 0.2);
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+
+  --topbar-bg: rgba(255, 255, 255, 0.88);
+  --mobile-nav-bg: rgba(255, 255, 255, 0.96);
+  --overlay-bg: rgba(0, 0, 0, 0.35);
+  --card-shadow: 0 24px 80px rgba(0, 0, 0, 0.08);
+  --modal-shadow: 0 32px 80px rgba(0, 0, 0, 0.12);
+  --nav-active-bg: rgba(99, 102, 241, 0.1);
+  --nav-active-border: rgba(99, 102, 241, 0.2);
+  --brand-gradient: linear-gradient(135deg, #18181b 0%, #6366f1 100%);
+  --table-hover: rgba(99, 102, 241, 0.05);
+  --logout-hover-bg: rgba(239, 68, 68, 0.08);
+  --logout-hover-color: #dc2626;
+
+  --sa-bg-base: #f0f4f8;
+  --sa-sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  --sa-sidebar-border: rgba(6, 182, 212, 0.15);
+  --sa-sidebar-brand-border: rgba(0, 0, 0, 0.06);
+  --sa-topbar-bg: rgba(255, 255, 255, 0.92);
+  --sa-topbar-border: rgba(0, 0, 0, 0.06);
+  --sa-card-bg: rgba(255, 255, 255, 0.95);
+  --sa-card-border: rgba(0, 0, 0, 0.08);
+  --sa-stat-bg: rgba(255, 255, 255, 0.98);
+  --sa-input-bg: #fafafa;
+  --sa-input-border: rgba(0, 0, 0, 0.1);
+  --sa-text: #18181b;
+  --sa-text-secondary: #3f3f46;
+  --sa-text-muted: #71717a;
+  --sa-text-label: #52525b;
+  --sa-nav-color: #71717a;
+  --sa-nav-hover-bg: rgba(6, 182, 212, 0.08);
+  --sa-nav-hover-color: #18181b;
+  --sa-nav-active-bg: rgba(6, 182, 212, 0.12);
+  --sa-nav-active-color: #0891b2;
+  --sa-nav-active-border: rgba(6, 182, 212, 0.25);
+  --sa-btn-secondary-bg: rgba(0, 0, 0, 0.03);
+  --sa-btn-secondary-border: rgba(0, 0, 0, 0.1);
+  --sa-btn-secondary-color: #3f3f46;
+  --sa-table-th-bg: rgba(0, 0, 0, 0.03);
+  --sa-table-th-color: #71717a;
+  --sa-table-hover: rgba(6, 182, 212, 0.06);
+  --sa-login-card-bg: rgba(255, 255, 255, 0.98);
+  --sa-login-card-border: rgba(6, 182, 212, 0.2);
+  --sa-login-glow: rgba(6, 182, 212, 0.1);
+  --sa-plan-card-bg: rgba(255, 255, 255, 0.9);
+  --sa-plan-card-border: rgba(0, 0, 0, 0.08);
+  --sa-mobile-card-bg: rgba(255, 255, 255, 0.95);
+  --sa-menu-toggle-bg: rgba(0, 0, 0, 0.04);
+
   --shadow-glow: 0 0 40px var(--accent-glow);
 }
 
@@ -35,6 +170,7 @@ body {
   color: var(--text-primary);
   line-height: 1.5;
   min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 a { color: inherit; text-decoration: none; }

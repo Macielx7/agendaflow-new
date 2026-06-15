@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Calendar, ClipboardList, Users, Briefcase,
-  Clock, Settings, LogOut, User,
+  Clock, Settings, LogOut, User, Wallet,
 } from 'lucide-react';
 import { APP_NAME, NAV_ITEMS } from '@/utils/constants';
 import { api } from '@/services/api';
@@ -12,7 +12,7 @@ import s from '@/styles/saas.module.css';
 
 const ICONS = {
   layout: LayoutDashboard, calendar: Calendar, clipboard: ClipboardList,
-  users: Users, briefcase: Briefcase, clock: Clock, settings: Settings,
+  users: Users, briefcase: Briefcase, wallet: Wallet, clock: Clock, settings: Settings,
 };
 
 export default function Sidebar({ open, onClose }) {

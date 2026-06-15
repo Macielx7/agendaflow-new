@@ -6,6 +6,7 @@ export const NAV_ITEMS = [
   { href: '/agendamentos', label: 'Agendamentos', icon: 'clipboard' },
   { href: '/clientes', label: 'Clientes', icon: 'users' },
   { href: '/servicos', label: 'Serviços', icon: 'briefcase' },
+  { href: '/financeiro', label: 'Financeiro', icon: 'wallet' },
   { href: '/horarios', label: 'Horários', icon: 'clock' },
   { href: '/configuracoes', label: 'Configurações', icon: 'settings' },
 ];

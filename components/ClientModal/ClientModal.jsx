@@ -1,81 +1,95 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { User } from 'lucide-react';
 import Modal from '@/components/Modal/Modal';
+import { InputCPF, InputWhatsApp, InputEmail, InputText } from '@/components/FormInput';
+import {
+  validateCPFField,
+  validateWhatsAppField,
+  validateEmailField,
+  validateNameField,
+} from '@/utils/fieldValidators';
 import s from '@/styles/saas.module.css';
 
-const empty = { name: '', phone: '', email: '', age: '', notes: '' };
+const empty = { name: '', cpf: '', phone: '', email: '', notes: '' };
 
 export default function ClientModal({ isOpen, onClose, onSave, client }) {
   const [form, setForm] = useState(empty);
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     setForm(
       client
         ? {
             name: client.name,
+            cpf: client.cpf || '',
             phone: client.phone,
             email: client.email || '',
-            age: client.age != null ? String(client.age) : '',
             notes: client.notes || '',
           }
         : empty,
     );
+    setSubmitError('');
   }, [client, isOpen]);
+
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const validateForm = () => {
+    const errors = [
+      validateNameField(form.name, true),
+      validateCPFField(form.cpf, true),
+      validateWhatsAppField(form.phone, true),
+      validateEmailField(form.email, false),
+    ].filter(Boolean);
+    return errors;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const errors = validateForm();
+    if (errors.length) {
+      setSubmitError(errors[0]);
+      return;
+    }
+    setSubmitError('');
     setLoading(true);
     try {
       await onSave(form);
       onClose();
     } catch (err) {
-      alert(err.message);
+      setSubmitError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={client ? 'Editar cliente' : 'Novo cliente'}>
       <form onSubmit={handleSubmit}>
-        <div className={s.formGroup}>
-          <label className={s.label}>Nome</label>
-          <input className={s.input} value={form.name} onChange={(e) => set('name', e.target.value)} required />
-        </div>
-        <div className={s.formGroup}>
-          <label className={s.label}>WhatsApp</label>
-          <input className={s.input} value={form.phone} onChange={(e) => set('phone', e.target.value)} required />
-        </div>
-        <div className={s.formGroup}>
-          <label className={s.label}>E-mail</label>
-          <input type="email" className={s.input} value={form.email} onChange={(e) => set('email', e.target.value)} />
-        </div>
-        <div className={s.formGroup}>
-          <label className={s.label}>Idade</label>
-          <input
-            type="number"
-            className={s.input}
-            value={form.age}
-            onChange={(e) => set('age', e.target.value)}
-            min={0}
-            max={150}
-            placeholder="Ex.: 32"
-          />
-        </div>
-        <div className={s.formGroup}>
-          <label className={s.label}>Observações</label>
-          <textarea
-            className={s.input}
-            rows={3}
-            value={form.notes}
-            onChange={(e) => set('notes', e.target.value)}
-            placeholder="Informe se a cliente possui alguma doença, alergia ou restrição de tratamento. Ex.: diabetes, hipertensão, alergia a produtos com fragrância..."
-          />
-        </div>
+        <InputText
+          label="Nome Completo"
+          icon={User}
+          value={form.name}
+          onChange={(v) => set('name', v)}
+          required
+        />
+        <InputCPF value={form.cpf} onChange={(v) => set('cpf', v)} required />
+        <InputWhatsApp value={form.phone} onChange={(v) => set('phone', v)} required />
+        <InputEmail value={form.email} onChange={(v) => set('email', v)} />
+        <InputText
+          label="Observações"
+          value={form.notes}
+          onChange={(v) => set('notes', v)}
+          multiline
+          rows={3}
+          placeholder="Informe se a cliente possui alguma doença, alergia ou restrição de tratamento..."
+          validate={() => null}
+        />
+        {submitError && (
+          <p style={{ color: '#f87171', fontSize: '0.85rem', marginBottom: 12 }}>{submitError}</p>
+        )}
         <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
           <button type="button" className={s.btnSecondary} onClick={onClose}>
             Cancelar
@@ -88,4 +102,3 @@ export default function ClientModal({ isOpen, onClose, onSave, client }) {
     </Modal>
   );
 }
- 

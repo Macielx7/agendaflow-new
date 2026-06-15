@@ -26,10 +26,12 @@ export async function GET(request) {
   const where = { tenantId };
 
   if (search) {
+    const searchDigits = search.replace(/\D/g, '');
     where.OR = [
       { name: { contains: search, mode: 'insensitive' } },
       { phone: { contains: search } },
       { email: { contains: search, mode: 'insensitive' } },
+      ...(searchDigits ? [{ cpf: { contains: searchDigits } }] : []),
     ];
   }
 
@@ -106,6 +108,7 @@ export async function POST(request) {
     return jsonResponse({ success: true, client }, 201);
   } catch (err) {
     console.error('POST /api/clients:', err);
+    if (err.code === 'P2002') return errorResponse('CPF já cadastrado para este cliente');
     return errorResponse(err.message || 'Erro ao criar cliente', 500);
   }
 }

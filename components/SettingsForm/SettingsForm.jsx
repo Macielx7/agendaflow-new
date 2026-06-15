@@ -1,12 +1,52 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Save, Loader2 } from 'lucide-react';
+import { InputText, InputEmail, InputWhatsApp } from '@/components/FormInput';
+import { onlyDigits } from '@/utils/masks';
 import s from '@/styles/saas.module.css';
 
+function normalizeSettings(items) {
+  return items.map((item) => ({
+    ...item,
+    value: item.key === 'company_phone' ? onlyDigits(item.value, 11) : item.value,
+  }));
+}
+
+function SettingField({ setting, onChange }) {
+  const { key, value, label } = setting;
+
+  if (key === 'company_phone') {
+    return <InputWhatsApp label={label || 'WhatsApp'} value={value} onChange={onChange} required={false} />;
+  }
+  if (key === 'company_email') {
+    return <InputEmail label={label || 'E-mail'} value={value} onChange={onChange} />;
+  }
+  if (key === 'company_name') {
+    return <InputText label={label || 'Nome da empresa'} value={value} onChange={onChange} required />;
+  }
+  if (value?.length > 80 || key === 'company_address') {
+    return (
+      <InputText
+        label={label || key}
+        value={value}
+        onChange={onChange}
+        multiline
+        rows={3}
+        validate={() => null}
+      />
+    );
+  }
+  return <InputText label={label || key} value={value} onChange={onChange} validate={() => null} />;
+}
+
 export default function SettingsForm({ settings, onSave }) {
-  const [form, setForm] = useState(settings);
+  const [form, setForm] = useState(() => normalizeSettings(settings));
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setForm(normalizeSettings(settings));
+  }, [settings]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,23 +59,26 @@ export default function SettingsForm({ settings, onSave }) {
   };
 
   const update = (key, value) => {
-    setForm((prev) => prev.map((s) => (s.key === key ? { ...s, value } : s)));
+    setForm((prev) => prev.map((item) => (item.key === key ? { ...item, value } : item)));
   };
 
   return (
     <form onSubmit={handleSubmit}>
       {form.map((setting) => (
-        <div key={setting.key} className={s.formGroup}>
-          <label className={s.label}>{setting.label || setting.key}</label>
-          {setting.value?.length > 80 ? (
-            <textarea className={s.input} rows={3} value={setting.value} onChange={(e) => update(setting.key, e.target.value)} />
-          ) : (
-            <input className={s.input} value={setting.value} onChange={(e) => update(setting.key, e.target.value)} />
-          )}
-        </div>
+        <SettingField
+          key={setting.key}
+          setting={setting}
+          onChange={(v) => update(setting.key, v)}
+        />
       ))}
       <button type="submit" className={s.btnPrimary} disabled={loading}>
-        {loading ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <><Save size={18} /> Salvar</>}
+        {loading ? (
+          <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+        ) : (
+          <>
+            <Save size={18} /> Salvar
+          </>
+        )}
       </button>
     </form>
   );
